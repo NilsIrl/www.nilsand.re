@@ -9,3 +9,7 @@ defaults:
           type: "posts"
         values:
           layout: "post"
+plugins:
+  - jekyll-minifier
+jekyll-minifier:
+  remove_intertag_spaces: true
