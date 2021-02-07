@@ -8,6 +8,8 @@ played in TrollCAT CTF 2021 and placed second. Here are my write-ups for the
 challenged I solved. If anything needs clarification, you are welcome and
 encouraged to contact me.
 
+![scoreboard](/assets/files/trollcatCTF21/scoreboard.png)
+
 * TOC
 {:toc}
 
