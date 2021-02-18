@@ -1,3 +1,7 @@
-body, img, video {
-	max-width: 690px;
+body {
+	max-width: 700px;
+}
+
+img, video {
+	max-width: 100%;
 }
