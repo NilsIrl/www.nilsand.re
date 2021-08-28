@@ -1,5 +1,5 @@
 ---
-title: Explicit actions imply intent, prefer implicit
+title: Explicit actions imply intent, prefer implicit actions
 category: [programming]
 ---
 
@@ -8,13 +8,13 @@ choices, one of them is deciding whether to do things in an implicit or
 explicit way.
 
 Generally (based on my personal experience) the explicit option is the one that
-people recommend taking because it is clear, leaves no doubt, and is more
-likely to be forward compatible.
+people recommend taking because it doesn't require knowledge of the implicit
+behaviour and is more likely to be forward compatible.
 
 For example, this could be when specifying arguments to a function, cli, etc.
-specifying default values even though omitting them would result in the same
-behaviour. Or in expressions, adding brackets for precedence even though it is
-not needed:
+specifying the same values as the default values even though not specifying
+that argument at all would result in the same behaviour. Or in expressions,
+adding brackets for precedence even though it is not needed:
 
 ```cpp
 // Here the brackets are superfluous
@@ -31,11 +31,12 @@ make someone believe the default is not what it is, or the operator precedence
 is not in the order it actually is and as a result, the implicit option is
 preferable in some if not most of these cases.
 
-If for some reason, the implicit way is really not clear, documentation
+Additionally, the implicit option also saves time when developing.
+
+If for some reason, the implicit way is not clear enough, documentation
 (mainly through comments) I believe is a better solution than bearing this
 implied intent and in the case of forward compatibility, often the new default
-is what you want and if it is not, it is no upgrading in those cases is usually
-not an issue.
+is what you want; if not, upgrading is usually trivial.
 
 To conclude, in software development clarity is something that we want to
 maximise, and I believe that more often than people think doing things
