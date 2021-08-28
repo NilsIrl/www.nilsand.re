@@ -13,5 +13,6 @@ kramdown:
   toc_levels: "1..4"
 plugins:
   - jekyll-minifier
+  - jekyll-feed
 jekyll-minifier:
   remove_intertag_spaces: true
