@@ -41,3 +41,6 @@ is what you want; if not, upgrading is usually trivial.
 To conclude, in software development clarity is something that we want to
 maximise, and I believe that more often than people think doing things
 implicitly is the way to go about that.
+
+Although this post was written in the context of software development the
+implied intent of being explicit also applies to different areas of life.
