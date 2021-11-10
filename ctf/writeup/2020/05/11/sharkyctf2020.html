@@ -1,56 +1,9 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>&#x200F;Nils's website - SharkyCTF 2020 The hare and the tortoise write-up</title>
-    <link rel="stylesheet" type="text/css" href="/assets/css/highlighting.css">
-      <link rel="stylesheet" type="text/css" href="/assets/css/post.css">
-    <link rel="alternate" type="application/atom+xml" title="Nils's blog RSS" href="feed.xml">
-  </head>
-  <body>
-    <header>
-      <h1><a href="/">Nils's website</a></h1>
-    </header>
-    <main>
-      <h2>SharkyCTF 2020 The hare and the tortoise write-up</h2>
-<p>This weekend, with my <a href="https://ctftime.org/team/118762">team</a>, I participated to <a href="https://ctfd.sharkyctf.xyz">Sharky CTF</a>. We ended up
-12th. Here is my write-up for the hare and the tortoise:</p>
-
-<p>I’m doing a writeup for this one because I didn’t take the intended route to
-solve it so it might be interesting to share.</p>
-
-<h3 id="description">Description:</h3>
-
-<p>Do you know Jean de La Fontaine? A friend of mine created a program mimicking
-the hare and the tortoise. He told me that smart tortoises always wins. I want
-you to be that tortoise.</p>
-
-<p>Connect with ssh tortoise@172.30.0.2. Password : tortoise.</p>
-
-<p>Creator : Nofix</p>
-
-<p>Attached is an <a href="https://ctfd.sharkyctf.xyz/naumachia/config/22">OpenVPN config</a> which gives access to a private network from
-which we can reach the server.</p>
-
-<h3 id="solution">Solution</h3>
-
-<p>After connecting to the server (@172.30.0.2), in the home directory there are
-some files:</p>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>tortoise@the_hare_and_the_tortoise$ ls -l
+<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>&#x200F;Nils's website - SharkyCTF 2020 The hare and the tortoise write-up</title><link rel="stylesheet" type="text/css" href="/assets/css/highlighting.css"><link rel="stylesheet" type="text/css" href="/assets/css/post.css"><link rel="alternate" type="application/atom+xml" title="Nils's blog RSS" href="feed.xml"></head><body><header><h1><a href="/">Nils's website</a></h1></header><main><h2>SharkyCTF 2020 The hare and the tortoise write-up</h2><p>This weekend, with my <a href="https://ctftime.org/team/118762">team</a>, I participated to <a href="https://ctfd.sharkyctf.xyz">Sharky CTF</a>. We ended up 12th. Here is my write-up for the hare and the tortoise:</p><p>I’m doing a writeup for this one because I didn’t take the intended route to solve it so it might be interesting to share.</p><h3 id="description">Description:</h3><p>Do you know Jean de La Fontaine? A friend of mine created a program mimicking the hare and the tortoise. He told me that smart tortoises always wins. I want you to be that tortoise.</p><p>Connect with ssh tortoise@172.30.0.2. Password : tortoise.</p><p>Creator : Nofix</p><p>Attached is an <a href="https://ctfd.sharkyctf.xyz/naumachia/config/22">OpenVPN config</a> which gives access to a private network from which we can reach the server.</p><h3 id="solution">Solution</h3><p>After connecting to the server (@172.30.0.2), in the home directory there are some files:</p><div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>tortoise@the_hare_and_the_tortoise$ ls -l
 -r-------- 1 hare hare   77 May 11 09:04 flag.txt
 -r--r--r-- 1 root root 2360 May 11 09:04 main.c
 -r--r--r-- 1 root root  687 May 11 09:04 semaphores.h
 -r-sr-xr-x 1 hare hare 2754 May 11 09:04 the_hare_and_the_tortoise
-</code></pre></div></div>
-
-<p>Only the <code class="language-plaintext highlighter-rouge">hare</code> user has access to the flag (stored in <code class="language-plaintext highlighter-rouge">flag.txt</code>), and there’s
-a suid binary that I guess was compiled from the source code in <code class="language-plaintext highlighter-rouge">main.c</code>.</p>
-
-<p>Here is the source code:</p>
-
-<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#include &lt;stdlib.h&gt;
+</code></pre></div></div><p>Only the <code class="language-plaintext highlighter-rouge">hare</code> user has access to the flag (stored in <code class="language-plaintext highlighter-rouge">flag.txt</code>), and there’s a suid binary that I guess was compiled from the source code in <code class="language-plaintext highlighter-rouge">main.c</code>.</p><p>Here is the source code:</p><div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#include &lt;stdlib.h&gt;
 #include &lt;stdio.h&gt;
 #include &lt;fcntl.h&gt;
 #include &lt;signal.h&gt;
@@ -162,15 +115,7 @@ a suid binary that I guess was compiled from the source code in <code class="lan
     <span class="n">puts</span><span class="p">(</span><span class="s">"Slow but steady wins the race!"</span><span class="p">);</span>
   <span class="p">}</span>
 <span class="p">}</span>
-</code></pre></div></div>
-
-<p>As you can see, a “hare” process is created (as a child) of the “tortoise”
-process. The “tortoise” process starts to read the file passed by <code class="language-plaintext highlighter-rouge">argv[1]</code>
-(the first argument). However, the hare process, after reading the same file a
-lot more quicker, sends a <code class="language-plaintext highlighter-rouge">SIGALARM</code> signal preventing the “tortoise” process
-from finishing.</p>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ ~/the_hare_and_the_tortoise ~/flag.txt
+</code></pre></div></div><p>As you can see, a “hare” process is created (as a child) of the “tortoise” process. The “tortoise” process starts to read the file passed by <code class="language-plaintext highlighter-rouge">argv[1]</code> (the first argument). However, the hare process, after reading the same file a lot more quicker, sends a <code class="language-plaintext highlighter-rouge">SIGALARM</code> signal preventing the “tortoise” process from finishing.</p><div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ ~/the_hare_and_the_tortoise ~/flag.txt
 The tortoise, progressing slowly... : "s"
 The hare says : "Do you ever get anywhere?"
 The tortoise, progressing slowly... : "h"
@@ -184,21 +129,7 @@ The tortoise, progressing slowly... : "r"
 The tortoise, progressing slowly... : "4"
 The tortoise, progressing slowly... : "c"
 Killed
-</code></pre></div></div>
-
-<p>After trying to understand how system V semaphores worked and not understanding
-anything, I fell back to a simpler solution: The “hare” and “tortoise” process
-each have their own file descriptor. The idea is to have the “hare” and
-“tortoise” process open different files. The “hare” process would open a very
-large file which will take time to be read, allowing the “tortoise” process to
-have the time to read <code class="language-plaintext highlighter-rouge">flag.txt</code>.</p>
-
-<p>The solution I took is based on <a href="https://www.youtube.com/watch?v=5g137gsB9Wk">a video</a> from <a href="https://www.youtube.com/channel/UClcE-kVhqyiHCcjYwcpfj9w">liveoverflow</a>, which I
-had watched earlier this year.</p>
-
-<p>I compiled the following code:</p>
-
-<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#define _GNU_SOURCE
+</code></pre></div></div><p>After trying to understand how system V semaphores worked and not understanding anything, I fell back to a simpler solution: The “hare” and “tortoise” process each have their own file descriptor. The idea is to have the “hare” and “tortoise” process open different files. The “hare” process would open a very large file which will take time to be read, allowing the “tortoise” process to have the time to read <code class="language-plaintext highlighter-rouge">flag.txt</code>.</p><p>The solution I took is based on <a href="https://www.youtube.com/watch?v=5g137gsB9Wk">a video</a> from <a href="https://www.youtube.com/channel/UClcE-kVhqyiHCcjYwcpfj9w">liveoverflow</a>, which I had watched earlier this year.</p><p>I compiled the following code:</p><div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#define _GNU_SOURCE
 #define _POSIX_C_SOURCE 200809L
 #define _ATFILE_SOURCE
 </span>
@@ -213,32 +144,11 @@ had watched earlier this year.</p>
         <span class="n">syscall</span><span class="p">(</span><span class="n">SYS_renameat2</span><span class="p">,</span> <span class="n">AT_FDCWD</span><span class="p">,</span> <span class="s">"flag"</span><span class="p">,</span> <span class="n">AT_FDCWD</span><span class="p">,</span> <span class="s">"sparse"</span><span class="p">,</span> <span class="n">RENAME_EXCHANGE</span><span class="p">);</span>
     <span class="p">}</span>
 <span class="p">}</span>
-</code></pre></div></div>
-
-<p>and then created a large file “sparse”, and a symlink to the flag inside of my
-working directory in <code class="language-plaintext highlighter-rouge">/tmp</code>.</p>
-
-<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">ln</span> <span class="nt">-s</span> ~/flag.txt flag
+</code></pre></div></div><p>and then created a large file “sparse”, and a symlink to the flag inside of my working directory in <code class="language-plaintext highlighter-rouge">/tmp</code>.</p><div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">ln</span> <span class="nt">-s</span> ~/flag.txt flag
 <span class="nb">truncate</span> <span class="nt">-s</span> 10G sparse
-</code></pre></div></div>
-
-<p>A <a href="https://en.wikipedia.org/wiki/Sparse_file">sparse file</a> is a file that doesn’t take space on disk (think of it like
-compression (I feel like some people will hate me for this definition)).</p>
-
-<p>The <code class="language-plaintext highlighter-rouge">racing.c</code> program will swap the <code class="language-plaintext highlighter-rouge">flag</code> symlink and <code class="language-plaintext highlighter-rouge">sparse</code> file thousands
-of times a seconds and hopefully, when the file descriptor is opened for the
-“hare”, the sparse file will be the one having the name <code class="language-plaintext highlighter-rouge">flag</code> and the when the
-tortoise opens the file, the symlink to <code class="language-plaintext highlighter-rouge">~/flag.txt</code>.</p>
-
-<p>In one terminal, I ran the racing program that switches the files:</p>
-
-<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code>gcc racing.c
+</code></pre></div></div><p>A <a href="https://en.wikipedia.org/wiki/Sparse_file">sparse file</a> is a file that doesn’t take space on disk (think of it like compression (I feel like some people will hate me for this definition)).</p><p>The <code class="language-plaintext highlighter-rouge">racing.c</code> program will swap the <code class="language-plaintext highlighter-rouge">flag</code> symlink and <code class="language-plaintext highlighter-rouge">sparse</code> file thousands of times a seconds and hopefully, when the file descriptor is opened for the “hare”, the sparse file will be the one having the name <code class="language-plaintext highlighter-rouge">flag</code> and the when the tortoise opens the file, the symlink to <code class="language-plaintext highlighter-rouge">~/flag.txt</code>.</p><p>In one terminal, I ran the racing program that switches the files:</p><div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code>gcc racing.c
 ./a.out
-</code></pre></div></div>
-
-<p>And in another, I ran the suid binary on <code class="language-plaintext highlighter-rouge">flag</code>.</p>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ ~/the_hare_and_the_tortoise flag
+</code></pre></div></div><p>And in another, I ran the suid binary on <code class="language-plaintext highlighter-rouge">flag</code>.</p><div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ ~/the_hare_and_the_tortoise flag
 The tortoise, progressing slowly... : ""
 The hare says : "Do you ever get anywhere?"
 The tortoise, progressing slowly... : ""
@@ -336,23 +246,5 @@ The tortoise, progressing slowly... : "4"
 The tortoise, progressing slowly... : "}"
 The tortoise, progressing slowly... : "}"
 Slow but steady wins the race!
-</code></pre></div></div>
-
-<p>After  multiple tries, the tortoise opened the symlink to <code class="language-plaintext highlighter-rouge">flag.txt</code> instead of
-the sparse file and I was able to transform the lines into a flag:</p>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>shkCTF{r4c35_4r3_3asi3r_wh3n_y0u_4r3_al0ne_6a26a26c57f0012ed66ab8c20e538a04}
-</code></pre></div></div>
-
-<p>Thank you to <a href="https://github.com/seanjpagano">seanjpagano</a>, for your <a href="https://github.com/LibWTF/ctf_writeups/blob/master/SharkyCTF-2020/The_hare_and_the_tortoise.md">writeup</a> which I used in order to
-get the files.</p>
-
-
-<time datetime="2020-05-11">11 May 2020</time>
-
-    </main>
-    <footer>
-      &copy; 2021 <a href="https://www.nilsand.re/">Nils André</a>
-    </footer>
-  </body>
-</html>
+</code></pre></div></div><p>After multiple tries, the tortoise opened the symlink to <code class="language-plaintext highlighter-rouge">flag.txt</code> instead of the sparse file and I was able to transform the lines into a flag:</p><div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>shkCTF{r4c35_4r3_3asi3r_wh3n_y0u_4r3_al0ne_6a26a26c57f0012ed66ab8c20e538a04}
+</code></pre></div></div><p>Thank you to <a href="https://github.com/seanjpagano">seanjpagano</a>, for your <a href="https://github.com/LibWTF/ctf_writeups/blob/master/SharkyCTF-2020/The_hare_and_the_tortoise.md">writeup</a> which I used in order to get the files.</p><time datetime="2020-05-11">11 May 2020</time></main><footer> &copy; 2021 <a href="https://www.nilsand.re/">Nils André</a></footer></body></html>
