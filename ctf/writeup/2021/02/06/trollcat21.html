@@ -1,0 +1,1166 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>&#x200F;Nils's website - TrollCAT CTF 2021 write-ups</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/highlighting.css">
+      <link rel="stylesheet" type="text/css" href="/assets/css/post.css">
+    <link rel="alternate" type="application/atom+xml" title="Nils's blog RSS" href="feed.xml">
+  </head>
+  <body>
+    <header>
+      <h1><a href="/">Nils's website</a></h1>
+    </header>
+    <main>
+      <h2>TrollCAT CTF 2021 write-ups</h2>
+<p>This weekend, my team, <a href="https://ctftime.org/team/120438">Pwnzorz</a>, and I played
+in TrollCAT CTF 2021 and came in second placed. Here are my write-ups for the
+challenges I solved. If anything needs clarification, you are both welcome and
+encouraged to contact me.</p>
+
+<p>I’d like to thank everyone in the team who got flags:
+<a href="https://www.aayushman.me/">Aayushman</a>,
+<a href="https://pranavgade20.github.io/">pranavgade20</a>, and
+<a href="https://www.uzpg.me/">Uzay-G</a>, as well as
+<a href="https://cscodershub.tech/">CSCODERSHUB</a> for organizing this CTF!</p>
+
+<p><img src="/assets/files/trollcatCTF21/scoreboard.png" alt="scoreboard" /></p>
+
+<ul id="markdown-toc">
+  <li><a href="#reversing" id="markdown-toc-reversing">Reversing</a>    <ul>
+      <li><a href="#no-debug-460-pts-33-solves" id="markdown-toc-no-debug-460-pts-33-solves">no debug (460 pts 33 solves)</a></li>
+    </ul>
+  </li>
+  <li><a href="#forensics" id="markdown-toc-forensics">Forensics</a>    <ul>
+      <li><a href="#forbidden-100-pts-111-solves" id="markdown-toc-forbidden-100-pts-111-solves">Forbidden (100 pts 111 solves)</a></li>
+      <li><a href="#mr_evilpepo_1-400-pts-51-solves" id="markdown-toc-mr_evilpepo_1-400-pts-51-solves">Mr_evilpepo_1 (400 pts 51 solves)</a></li>
+      <li><a href="#mr_evilpepo_2-496-pts-12-solves--mr_evilpepo_3-498-pts-9-solves" id="markdown-toc-mr_evilpepo_2-496-pts-12-solves--mr_evilpepo_3-498-pts-9-solves">Mr_evilpepo_2 (496 pts 12 solves) &amp; Mr_evilpepo_3 (498 pts 9 solves)</a></li>
+    </ul>
+  </li>
+  <li><a href="#cryptography" id="markdown-toc-cryptography">Cryptography</a>    <ul>
+      <li><a href="#radio-station-apocalypse-457-pts-34-solves" id="markdown-toc-radio-station-apocalypse-457-pts-34-solves">Radio Station Apocalypse (457 pts 34 solves)</a></li>
+    </ul>
+  </li>
+  <li><a href="#networking" id="markdown-toc-networking">Networking</a>    <ul>
+      <li><a href="#free-wifi-316-pts-69-solves" id="markdown-toc-free-wifi-316-pts-69-solves">FREE WIFI (316 pts 69 solves)</a></li>
+      <li><a href="#i-am-so-sed-500-pts-1-solve-me-" id="markdown-toc-i-am-so-sed-500-pts-1-solve-me-">I am so sed (500 pts 1 solve (me 😊))</a></li>
+      <li><a href="#granny-wants-you-496-pts-12-solves" id="markdown-toc-granny-wants-you-496-pts-12-solves">Granny wants you (496 pts 12 solves)</a></li>
+    </ul>
+  </li>
+  <li><a href="#steganography" id="markdown-toc-steganography">Steganography</a>    <ul>
+      <li><a href="#change-my-mind-100-pts-210-solves" id="markdown-toc-change-my-mind-100-pts-210-solves">Change my mind (100 pts 210 solves)</a></li>
+    </ul>
+  </li>
+</ul>
+
+<h3 id="reversing">Reversing</h3>
+
+<h4 id="no-debug-460-pts-33-solves">no debug (460 pts 33 solves)</h4>
+
+<h5 id="description">Description</h5>
+
+<p>Exterminators stay away !</p>
+
+<p>nc 157.230.33.195 3333</p>
+
+<p><a href="https://cdn.discordapp.com/attachments/806943688625225758/807504565384904764/dist.zip">file</a>
+Flag format : Trollcat{.*} Author : codacker</p>
+
+<h5 id="solution">Solution</h5>
+
+<p>When running <code class="language-plaintext highlighter-rouge">file</code> on the executable, we can see that it is stripped:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ file crackme
+crackme: ELF 64-bit LSB pie executable, x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, BuildID[sha1]=f4599ab6673e44ee040c43849f7af66cd81a3d45, for GNU/Linux 3.2.0, stripped
+</code></pre></div></div>
+
+<p>Which means there are are no symbols to help us, including to find the main
+function. I opened the binary in <a href="https://ghidra-sre.org/">Ghidra</a> and to find
+the main function, started with with the entry point:</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">void</span> <span class="nf">entry</span><span class="p">(</span><span class="n">undefined8</span> <span class="n">param_1</span><span class="p">,</span><span class="n">undefined8</span> <span class="n">param_2</span><span class="p">,</span><span class="n">undefined8</span> <span class="n">param_3</span><span class="p">)</span>
+
+<span class="p">{</span>
+  <span class="n">undefined8</span> <span class="n">in_stack_00000000</span><span class="p">;</span>
+  <span class="n">undefined</span> <span class="n">auStack8</span> <span class="p">[</span><span class="mi">8</span><span class="p">];</span>
+  
+  <span class="n">__libc_start_main</span><span class="p">(</span><span class="n">FUN_001017b6</span><span class="p">,</span><span class="n">in_stack_00000000</span><span class="p">,</span><span class="o">&amp;</span><span class="n">stack0x00000008</span><span class="p">,</span><span class="n">FUN_00101880</span><span class="p">,</span><span class="n">FUN_001018e0</span><span class="p">,</span>
+                    <span class="n">param_3</span><span class="p">,</span><span class="n">auStack8</span><span class="p">);</span>
+  <span class="k">do</span> <span class="p">{</span>
+                    <span class="c1">// WARNING: Do nothing block with infinite loop</span>
+  <span class="p">}</span> <span class="k">while</span><span class="p">(</span> <span class="nb">true</span> <span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Here the main function is the first argument of <code class="language-plaintext highlighter-rouge">__libc_start_main</code>, (which we
+can now rename to <code class="language-plaintext highlighter-rouge">main</code> inside of Ghidra).</p>
+
+<p>Looking at its decompilation, we can see that the main function takes input from
+the user, gives it to a function (I’ll rename <code class="language-plaintext highlighter-rouge">check</code>) along side with the
+length of the input and if the check function returns something else than a zero
+it prints the flag to the user.</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">undefined8</span> <span class="nf">main</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+
+<span class="p">{</span>
+  <span class="kt">int</span> <span class="n">iVar1</span><span class="p">;</span>
+  <span class="n">undefined8</span> <span class="n">uStack288</span><span class="p">;</span>
+  <span class="n">undefined</span> <span class="n">local_118</span> <span class="p">[</span><span class="mi">264</span><span class="p">];</span>
+  <span class="kt">ssize_t</span> <span class="n">local_10</span><span class="p">;</span>
+  
+  <span class="n">uStack288</span> <span class="o">=</span> <span class="mh">0x1017d2</span><span class="p">;</span>
+  <span class="n">printf</span><span class="p">(</span><span class="s">"Enter key: "</span><span class="p">);</span>
+  <span class="n">uStack288</span> <span class="o">=</span> <span class="mh">0x1017eb</span><span class="p">;</span>
+  <span class="n">local_10</span> <span class="o">=</span> <span class="n">read</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">local_118</span><span class="p">,</span><span class="mh">0xff</span><span class="p">);</span>
+  <span class="k">if</span> <span class="p">(</span><span class="n">local_10</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">local_118</span><span class="p">[</span><span class="n">local_10</span> <span class="o">+</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+  <span class="p">}</span>
+  <span class="n">uStack288</span> <span class="o">=</span> <span class="mh">0x101820</span><span class="p">;</span>
+  <span class="n">iVar1</span> <span class="o">=</span> <span class="n">FUN_00101738</span><span class="p">(</span><span class="n">local_118</span><span class="p">,</span><span class="n">local_10</span> <span class="o">+</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">local_10</span> <span class="o">+</span> <span class="o">-</span><span class="mi">1</span><span class="p">);</span>
+  <span class="k">if</span> <span class="p">(</span><span class="n">iVar1</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">uStack288</span> <span class="o">=</span> <span class="mh">0x10186f</span><span class="p">;</span>
+    <span class="n">puts</span><span class="p">(</span><span class="s">"Invalid key"</span><span class="p">);</span>
+  <span class="p">}</span>
+  <span class="k">else</span> <span class="p">{</span>
+    <span class="n">uStack288</span> <span class="o">=</span> <span class="mh">0x101835</span><span class="p">;</span>
+    <span class="n">printf</span><span class="p">(</span><span class="s">"Congrats here is your flag: "</span><span class="p">);</span>
+    <span class="n">uStack288</span> <span class="o">=</span> <span class="mh">0x10184b</span><span class="p">;</span>
+    <span class="n">iVar1</span> <span class="o">=</span> <span class="n">open</span><span class="p">(</span><span class="s">"/flag"</span><span class="p">,</span><span class="mi">0</span><span class="p">);</span>
+    <span class="n">uStack288</span> <span class="o">=</span> <span class="mh">0x101861</span><span class="p">;</span>
+    <span class="n">sendfile</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">iVar1</span><span class="p">,(</span><span class="kt">off_t</span> <span class="o">*</span><span class="p">)</span><span class="mh">0x0</span><span class="p">,</span><span class="mh">0x100</span><span class="p">);</span>
+  <span class="p">}</span>
+  <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>This means that what we want to achieve is that the check function, given our
+input, returns a non-zero value.</p>
+
+<p>Looking at the decompilation of the <code class="language-plaintext highlighter-rouge">check</code> function, we can see that it calls
+2 functions with parameters 1. the length of the user input 2. some global
+variables. It then compares the user input with one of the global variables and
+if they both match, return 1, otherwise return 0.</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">undefined8</span> <span class="nf">check</span><span class="p">(</span><span class="kt">long</span> <span class="n">param_1</span><span class="p">,</span><span class="n">ulong</span> <span class="n">param_2</span><span class="p">)</span>
+
+<span class="p">{</span>
+  <span class="kt">int</span> <span class="n">local_c</span><span class="p">;</span>
+  
+  <span class="n">FUN_001014bc</span><span class="p">(</span><span class="n">s_waRaSg47_NpGiS93niKQKtKQ7dihholA_001040a0</span><span class="p">,</span><span class="mh">0x20</span><span class="p">);</span>
+  <span class="n">FUN_001015f8</span><span class="p">(</span><span class="o">&amp;</span><span class="n">DAT_001040d0</span><span class="p">,</span><span class="n">param_2</span><span class="p">);</span>
+  <span class="n">local_c</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+  <span class="k">while</span><span class="p">(</span> <span class="nb">true</span> <span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">param_2</span> <span class="o">&lt;=</span> <span class="p">(</span><span class="n">ulong</span><span class="p">)(</span><span class="kt">long</span><span class="p">)</span><span class="n">local_c</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">return</span> <span class="mi">1</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="k">if</span> <span class="p">(</span><span class="o">*</span><span class="p">(</span><span class="kt">char</span> <span class="o">*</span><span class="p">)(</span><span class="n">param_1</span> <span class="o">+</span> <span class="n">local_c</span><span class="p">)</span> <span class="o">!=</span> <span class="p">(</span><span class="o">&amp;</span><span class="n">DAT_001040d0</span><span class="p">)[</span><span class="n">local_c</span><span class="p">])</span> <span class="k">break</span><span class="p">;</span>
+    <span class="n">local_c</span> <span class="o">=</span> <span class="n">local_c</span> <span class="o">+</span> <span class="mi">1</span><span class="p">;</span>
+  <span class="p">}</span>
+  <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Because the functions called inside of <code class="language-plaintext highlighter-rouge">check</code> are only dependent on the length
+of the user input and not the user input itself, we don’t have to understand
+how the 2 functions affect the global variables; we can just see (using a
+debugger) what the value of the global variable is, and then give that as user
+input.</p>
+
+<p>So I ran the binary inside of <code class="language-plaintext highlighter-rouge">gdb</code> but something unexpected happened: when
+breaking on the main function (identified because it is the first parameter of
+<code class="language-plaintext highlighter-rouge">__libc_start_main</code>, and therefore its address is located in the <code class="language-plaintext highlighter-rouge">rdi</code> register
+when <code class="language-plaintext highlighter-rouge">__libc_start_main</code> is called), our breakpoint would never be reached but
+we would still be asked to enter the key:</p>
+
+<script id="asciicast-oUXRrYljYirXrMfZe4ThBSHte" src="https://asciinema.org/a/oUXRrYljYirXrMfZe4ThBSHte.js" async=""></script>
+
+<p>To understand where I was, I pressed CTRL-C when the input was given and saw
+the following backtrace:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code> ► f 0     7ffff7ebeec2 read+18
+   f 1     555555555393
+   f 2     5555555554af
+   f 3     5555555558c5
+   f 4     7ffff7df60de __libc_start_main+126
+</code></pre></div></div>
+
+<p>Looking inside of Ghidra what those addresses corresponded to:</p>
+
+<p>0x8c5:</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">void</span> <span class="nf">FUN_00101880</span><span class="p">(</span><span class="n">undefined4</span> <span class="n">param_1</span><span class="p">,</span><span class="n">undefined8</span> <span class="n">param_2</span><span class="p">,</span><span class="n">undefined8</span> <span class="n">param_3</span><span class="p">)</span>
+
+<span class="p">{</span>
+  <span class="kt">long</span> <span class="n">lVar1</span><span class="p">;</span>
+  
+  <span class="n">_DT_INIT</span><span class="p">();</span>
+  <span class="n">lVar1</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+  <span class="k">do</span> <span class="p">{</span>
+    <span class="p">(</span><span class="o">*</span><span class="p">(</span><span class="n">code</span> <span class="o">*</span><span class="p">)(</span><span class="o">&amp;</span><span class="n">__DT_INIT_ARRAY</span><span class="p">)[</span><span class="n">lVar1</span><span class="p">])(</span><span class="n">param_1</span><span class="p">,</span><span class="n">param_2</span><span class="p">,</span><span class="n">param_3</span><span class="p">);</span>
+    <span class="n">lVar1</span> <span class="o">=</span> <span class="n">lVar1</span> <span class="o">+</span> <span class="mi">1</span><span class="p">;</span>
+  <span class="p">}</span> <span class="k">while</span> <span class="p">(</span><span class="n">lVar1</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">);</span>
+  <span class="k">return</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>0x4af:</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">void</span> <span class="nf">FUN_0010141a</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+
+<span class="p">{</span>
+  <span class="kt">long</span> <span class="n">lVar1</span><span class="p">;</span>
+  
+  <span class="n">setvbuf</span><span class="p">(</span><span class="n">stdin</span><span class="p">,(</span><span class="kt">char</span> <span class="o">*</span><span class="p">)</span><span class="mh">0x0</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">);</span>
+  <span class="n">setvbuf</span><span class="p">(</span><span class="n">stdout</span><span class="p">,(</span><span class="kt">char</span> <span class="o">*</span><span class="p">)</span><span class="mh">0x0</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">);</span>
+  <span class="n">setvbuf</span><span class="p">(</span><span class="n">stderr</span><span class="p">,(</span><span class="kt">char</span> <span class="o">*</span><span class="p">)</span><span class="mh">0x0</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">);</span>
+  <span class="n">alarm</span><span class="p">(</span><span class="mh">0x30</span><span class="p">);</span>
+  <span class="n">lVar1</span> <span class="o">=</span> <span class="n">ptrace</span><span class="p">(</span><span class="n">PTRACE_TRACEME</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">);</span>
+  <span class="k">if</span> <span class="p">(</span><span class="n">lVar1</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">FUN_001011e5</span><span class="p">();</span>
+                    <span class="c1">// WARNING: Subroutine does not return</span>
+    <span class="n">exit</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+  <span class="p">}</span>
+  <span class="k">return</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>We can see that inside of the second function, it uses <code class="language-plaintext highlighter-rouge">ptrace</code> to see if the
+process is already traced which would be the case if it ran inside of a
+debugger. If this anti debugging function detects that the process is traced,
+it runs another function (a fake main) and then exists, otherwise it continues
+(to the main function).</p>
+
+<p>So what I did is change the value returned by <code class="language-plaintext highlighter-rouge">ptrace</code> so that the fake main
+function isn’t executed and I then printed the value of the global variable
+that the user input is compared to in <code class="language-plaintext highlighter-rouge">check</code>.</p>
+
+<script id="asciicast-EPUuQHd54cYLo5i7h0TFgQy1D" src="https://asciinema.org/a/EPUuQHd54cYLo5i7h0TFgQy1D.js" async=""></script>
+
+<p>Here <code class="language-plaintext highlighter-rouge">0x555555555767</code> (first breakpoint) is the address where the second
+function is called inside of the <code class="language-plaintext highlighter-rouge">check</code> function. <code class="language-plaintext highlighter-rouge">0x5555555554a0</code> is where the
+value returned by ptrace is checked and <code class="language-plaintext highlighter-rouge">0x5555555580d0</code> is the address of the
+variable.</p>
+
+<p>We can now use that value against the remote instance and get the flag:</p>
+
+<script id="asciicast-CxL4D1QcVYO7DGJ1wu2EwISfu" src="https://asciinema.org/a/CxL4D1QcVYO7DGJ1wu2EwISfu.js" async="" data-rows="15"></script>
+
+<h3 id="forensics">Forensics</h3>
+
+<h4 id="forbidden-100-pts-111-solves">Forbidden (100 pts 111 solves)</h4>
+
+<h5 id="description-1">Description</h5>
+
+<p>Agent Troll recieved some file but not able to read the data can you help us?</p>
+
+<p>Author: White_Wolf</p>
+
+<p><a href="/assets/files/trollcatCTF21/trollcats.car">trollcats.car</a></p>
+
+<h5 id="solution-1">Solution</h5>
+
+<p>Running <code class="language-plaintext highlighter-rouge">file</code> on the attached file revealed nothing:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ file trollcats.car
+assets/files/trollcatCTF21/trollcats.car: data
+</code></pre></div></div>
+
+<p>So, I opened the file in an editor as I usually do and saw that some plain
+strings were visible:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ strings trollcats.car
+CAR1
+BZh9
+rE8P
+BZh9
+rE8P
+BZh9
+rE8P
+BZh91AY&amp;SY
+@BZh9
+rE8P
+BZh9
+rE8P
+are_you_trying_to_use_strings
+cats
+doyoulovecats
+foryoudeer
+marmar
+Troll
+</code></pre></div></div>
+
+<p>The repetition of “BZh9” caught my attention as it looked oddly familiar. I
+searched it up and the first result was a link to the <a href="https://en.wikipedia.org/wiki/Bzip2">Wikipedia page for
+bzip2</a>. Considering the bzip2 part didn’t
+seem to start at the beginning of the file (the file starts with “CAR1”), I
+decided to use binwalk to make the process easier:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ binwalk -e trollcats.car
+DECIMAL       HEXADECIMAL     DESCRIPTION
+--------------------------------------------------------------------------------
+50            0x32            bzip2 compressed data, block size = 900k
+$ cat _trollcats.car.extracted/32
+Trollcat{M0zilla_Archive_maaaarls}
+</code></pre></div></div>
+
+<h4 id="mr_evilpepo_1-400-pts-51-solves">Mr_evilpepo_1 (400 pts 51 solves)</h4>
+
+<h5 id="description-2">Description</h5>
+
+<p>We have caught Mr.EvilPepo and now it is time for you to investigate him we
+searched his house and we got not much proof we got some report from OSINT
+department and Our OSINT Investigator told us that he mentioned on his socials
+“Hack Me if you can, i use same password Everywhere” we have dumped his computer
+memory and for further investigation we need your help. he typed the flag
+command somewhere and now he forgot it. can you find it?</p>
+
+<p><a href="https://mega.nz/file/y90gWRJa#6lJ4qpKw3bfLKvbcTuvcOgGdDpYS9AapC_mwKM-4Zg4">File</a></p>
+
+<p>Flag Format: Trolcat{}</p>
+
+<p>Author: White_wolf</p>
+
+<h5 id="solution-2">Solution</h5>
+
+<p>The link is a download for a file, <code class="language-plaintext highlighter-rouge">evilpepo.vmem.7z</code>. The presence of <code class="language-plaintext highlighter-rouge">mem</code>
+suggests that it is a memory dump; time to use
+<a href="https://www.volatilityfoundation.org/">volatility</a>!</p>
+
+<p>After extracting it using 7z (<code class="language-plaintext highlighter-rouge">7z x evilpepo.vmem.7z</code>), I started off with the
+usual <code class="language-plaintext highlighter-rouge">imageinfo</code> in order to detect the type of dump it was and, most
+importantly, to get a profile:</p>
+
+<pre>
+$ volatility -f evilpepo.vmem imageinfo
+          Suggested Profile(s) : <b>Win7SP1x64</b>, Win7SP0x64, Win2008R2SP0x64, Win2008R2SP1x64_24000, Win2008R2SP1x64_23418, Win2008R2SP1x64, Win7SP1x64_24000, Win7SP1x64_23418
+                     AS Layer1 : WindowsAMD64PagedMemory (Kernel AS)
+                     AS Layer2 : FileAddressSpace (/home/nils/Downloads/evilpepo.vmem)
+                      PAE type : No PAE
+                           DTB : 0x187000L
+                          KDBG : 0xf80002a3f0a0L
+          Number of Processors : 1
+     Image Type (Service Pack) : 1
+                KPCR for CPU 0 : 0xfffff80002a40d00L
+             KUSER_SHARED_DATA : 0xfffff78000000000L
+           Image date and time : 2021-01-12 13:22:41 UTC+0000
+     Image local date and time : 2021-01-12 18:52:41 +0530
+</pre>
+
+<p>The mention of “command” in the challenge description suggested that it had
+something to do with a command typed into <code class="language-plaintext highlighter-rouge">cmd.exe</code>, so I ran the <code class="language-plaintext highlighter-rouge">consoles</code>
+plug-in:</p>
+
+<pre>
+$ volatility -f evilpepo.vmem --profile=Win7SP1x64 consoles
+**************************************************
+ConsoleProcess: conhost.exe Pid: 992
+Console: 0xff346200 CommandHistorySize: 50
+HistoryBufferCount: 1 HistoryBufferMax: 4
+OriginalTitle: Command Prompt
+Title: Command Prompt
+AttachedProcess: cmd.exe Pid: 1492 Handle: 0x60
+----
+CommandHistory: 0x39eb60 Application: cmd.exe Flags: Allocated, Reset
+CommandCount: 37 LastAdded: 36 LastDisplayed: 36
+FirstCommand: 0 CommandCountMax: 50
+ProcessHandle: 0x60
+Cmd #0 at 0x37e550: helo
+Cmd #1 at 0x37e570: troollll
+Cmd #2 at 0x37e590: caaat
+Cmd #3 at 0x37e5b0: yooooo
+Cmd #4 at 0x39de90: <b>T</b>
+Cmd #5 at 0x39dcd0: <b>r</b>
+Cmd #6 at 0x3a2f00: <b>o</b>
+Cmd #7 at 0x3a2f20: <b>l</b>
+Cmd #8 at 0x3a2f40: <b>c</b>
+Cmd #9 at 0x3a2f60: <b>a</b>
+Cmd #10 at 0x3a2fb0: <b>t</b>
+Cmd #11 at 0x3a2fc0: <b>{</b>
+Cmd #12 at 0x3a2fd0: <b>c</b>
+Cmd #13 at 0x3a2fe0: <b>o</b>
+Cmd #14 at 0x3a2ff0: <b>m</b>
+Cmd #15 at 0x3a3000: <b>a</b>
+Cmd #16 at 0x3a3010: <b>n</b>
+Cmd #17 at 0x3a3020: <b>d</b>
+Cmd #18 at 0x3a3030: <b>s</b>
+Cmd #19 at 0x3a3040: <b>_</b>
+Cmd #20 at 0x3a3050: <b>4</b>
+Cmd #21 at 0x3a3060: <b>r</b>
+Cmd #22 at 0x3a3070: <b>3</b>
+Cmd #23 at 0x3a3080: <b>_</b>
+Cmd #24 at 0x3a3090: <b>i</b>
+Cmd #25 at 0x3a30a0: <b>m</b>
+Cmd #26 at 0x3a30b0: <b>p</b>
+Cmd #27 at 0x3a30c0: <b>o</b>
+Cmd #28 at 0x3a30d0: <b>r</b>
+Cmd #29 at 0x3a30e0: <b>t</b>
+Cmd #30 at 0x3a30f0: <b>a</b>
+Cmd #31 at 0x3a3100: <b>n</b>
+Cmd #32 at 0x3a3110: <b>t</b>
+Cmd #33 at 0x3a3120: <b>}</b>
+Cmd #34 at 0x3a33b0: hope you got it 
+Cmd #35 at 0x377860: "are you trying to run strings?"
+Cmd #36 at 0x3a33e0: lolololololol
+----
+Screen 0x381120 X:80 Y:300
+Dump:
+Microsoft Windows [Version 6.1.7601]                                            
+Copyright (c) 2009 Microsoft Corporation.  All rights reserved.                 
+                                                                                
+C:\Users\WhiteWolf&gt;helo                                                         
+'helo' is not recognized as an internal or external command,                    
+operable program or batch file.                                                 
+                                                                                
+C:\Users\WhiteWolf&gt;troollll                                                     
+'troollll' is not recognized as an internal or external command,                
+operable program or batch file.                                                 
+                                                                                
+C:\Users\WhiteWolf&gt;caaat                                                        
+'caaat' is not recognized as an internal or external command,                   
+operable program or batch file.                                                 
+                                                                                
+C:\Users\WhiteWolf&gt;yooooo                                                       
+'yooooo' is not recognized as an internal or external command,                  
+operable program or batch file.                                                 
+                                                                                
+C:\Users\WhiteWolf&gt;<b>T</b>
+'T' is not recognized as an internal or external command,                       
+operable program or batch file.                                                 
+                                                                                
+C:\Users\WhiteWolf&gt;<b>r</b>
+'r' is not recognized as an internal or external command,                       
+operable program or batch file.                                                 
+                                                                                
+C:\Users\WhiteWolf&gt;<b>o</b>
+'o' is not recognized as an internal or external command,                       
+operable program or batch file.                                                 
+                                                                                
+C:\Users\WhiteWolf&gt;<b>l</b>
+'l' is not recognized as an internal or external command,                       
+operable program or batch file.                                                 
+                                                                                
+C:\Users\WhiteWolf&gt;<b>l</b>
+'l' is not recognized as an internal or external command,                       
+operable program or batch file.                                                 
+                                                                                
+C:\Users\WhiteWolf&gt;<b>c</b>
+'c' is not recognized as an internal or external command,                       
+operable program or batch file.                                                 
+                                                                                
+C:\Users\WhiteWolf&gt;<b>a</b>
+'a' is not recognized as an internal or external command,                       
+operable program or batch file.                                                 
+                                                                                
+C:\Users\WhiteWolf&gt;<b>t</b>
+'t' is not recognized as an internal or external command,                       
+operable program or batch file.                                                 
+                                                                                
+C:\Users\WhiteWolf&gt;<b>{</b>
+'{' is not recognized as an internal or external command,                       
+operable program or batch file.                                                 
+                                                                                
+C:\Users\WhiteWolf&gt;<b>c</b>
+'c' is not recognized as an internal or external command,                       
+operable program or batch file.                                                 
+                                                                                
+C:\Users\WhiteWolf&gt;<b>o</b>
+'o' is not recognized as an internal or external command,                       
+operable program or batch file.                                                 
+                                                                                
+C:\Users\WhiteWolf&gt;<b>m</b>
+'m' is not recognized as an internal or external command,                       
+operable program or batch file.                                                 
+                                                                                
+C:\Users\WhiteWolf&gt;<b>m</b>
+'m' is not recognized as an internal or external command,                       
+operable program or batch file.                                                 
+                                                                                
+C:\Users\WhiteWolf&gt;<b>a</b>
+'a' is not recognized as an internal or external command,                       
+operable program or batch file.                                                 
+                                                                                
+C:\Users\WhiteWolf&gt;<b>n</b>
+'n' is not recognized as an internal or external command,                       
+operable program or batch file.                                                 
+                                                                                
+C:\Users\WhiteWolf&gt;<b>d</b>
+'d' is not recognized as an internal or external command,                       
+operable program or batch file.                                                 
+                                                                                
+C:\Users\WhiteWolf&gt;<b>s</b>
+'s' is not recognized as an internal or external command,                       
+operable program or batch file.                                                 
+                                                                                
+C:\Users\WhiteWolf&gt;<b>_</b>
+'_' is not recognized as an internal or external command,                       
+operable program or batch file.                                                 
+                                                                                
+C:\Users\WhiteWolf&gt;<b>4</b>
+'4' is not recognized as an internal or external command,                       
+operable program or batch file.                                                 
+                                                                                
+C:\Users\WhiteWolf&gt;<b>r</b>
+'r' is not recognized as an internal or external command,                       
+operable program or batch file.                                                 
+                                                                                
+C:\Users\WhiteWolf&gt;<b>3</b>
+'3' is not recognized as an internal or external command,                       
+operable program or batch file.                                                 
+                                                                                
+C:\Users\WhiteWolf&gt;<b>_</b>
+'_' is not recognized as an internal or external command,                       
+operable program or batch file.                                                 
+                                                                                
+C:\Users\WhiteWolf&gt;<b>i</b>
+'i' is not recognized as an internal or external command,                       
+operable program or batch file.                                                 
+                                                                                
+C:\Users\WhiteWolf&gt;<b>m</b>
+'m' is not recognized as an internal or external command,                       
+operable program or batch file.                                                 
+                                                                                
+C:\Users\WhiteWolf&gt;<b>p</b>
+'p' is not recognized as an internal or external command,                       
+operable program or batch file.                                                 
+                                                                                
+C:\Users\WhiteWolf&gt;<b>o</b>
+'o' is not recognized as an internal or external command,                       
+operable program or batch file.                                                 
+                                                                                
+C:\Users\WhiteWolf&gt;<b>r</b>
+'r' is not recognized as an internal or external command,                       
+operable program or batch file.                                                 
+                                                                                
+C:\Users\WhiteWolf&gt;<b>t</b>
+'t' is not recognized as an internal or external command,                       
+operable program or batch file.                                                 
+                                                                                
+C:\Users\WhiteWolf&gt;<b>a</b>
+'a' is not recognized as an internal or external command,                       
+operable program or batch file.                                                 
+                                                                                
+C:\Users\WhiteWolf&gt;<b>n</b>
+'n' is not recognized as an internal or external command,                       
+operable program or batch file.                                                 
+                                                                                
+C:\Users\WhiteWolf&gt;<b>t</b>
+'t' is not recognized as an internal or external command,                       
+operable program or batch file.                                                 
+                                                                                
+C:\Users\WhiteWolf&gt;<b>}</b>
+'}' is not recognized as an internal or external command,                       
+operable program or batch file.                                                 
+                                                                                
+C:\Users\WhiteWolf&gt;hope you got it                                              
+'hope' is not recognized as an internal or external command,                    
+operable program or batch file.                                                 
+                                                                                
+C:\Users\WhiteWolf&gt;"are you trying to run strings?"                             
+'"are you trying to run strings?"' is not recognized as an internal or external 
+command,                                                                        
+operable program or batch file.                                                 
+                                                                                
+C:\Users\WhiteWolf&gt;lolololololol                                                
+'lolololololol' is not recognized as an internal or external command,           
+operable program or batch file.                                                 
+                                                                                
+C:\Users\WhiteWolf&gt;                                                             
+</pre>
+
+<p>As can be seen from the output, the Mr. EvilPepo typed the flag one letter at a
+time into his console. The letters joined together on 1 line give us the flag:</p>
+
+<h5 id="flag">Flag</h5>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Trolcat{comands_4r3_important}
+</code></pre></div></div>
+
+<h4 id="mr_evilpepo_2-496-pts-12-solves--mr_evilpepo_3-498-pts-9-solves">Mr_evilpepo_2 (496 pts 12 solves) &amp; Mr_evilpepo_3 (498 pts 9 solves)</h4>
+
+<h5 id="description-3">Description</h5>
+
+<h6 id="2">2</h6>
+
+<p>Now After some good beating, Mr.EvilPepo saying he hides something on the
+internet. find it</p>
+
+<p>Note: Use the file provided in Mr.EvilPepo Part-1</p>
+
+<p>AUTHOR: WHITE_WOLF</p>
+
+<h6 id="3">3</h6>
+
+<p>The Top Secret file of Mr.EvilPepo is still not discovered this is your last
+mission of finding the top secret file related to Mr.EvilPepo Good Luck</p>
+
+<p>Note: Use the file provided in Mr.EvilPepo Part-1</p>
+
+<p>AUTHOR: WHITE_WOLF</p>
+
+<h5 id="solution-3">Solution</h5>
+
+<p>The descriptions for Mr_evilpepo 2 &amp; 3 are quite cryptic. They don’t really
+point in any direction so I solved them together, just exploring the memory
+dump.</p>
+
+<p>I continued through the list of plug-ins (listed using <code class="language-plaintext highlighter-rouge">volatility --help</code>) and
+ran the <code class="language-plaintext highlighter-rouge">clipboard</code> plug-in:</p>
+
+<pre>
+$ volatility -f evilpepo.vmem --profile=Win7SP1x64 clipboard
+Session    WindowStation Format                         Handle Object             Data                                              
+---------- ------------- ------------------ ------------------ ------------------ --------------------------------------------------
+         1 WinSta0       CF_UNICODETEXT               0x1501c9 0xfffff900c1b4da60 <b>https://mega.nz/file/m18...QogECaGsS5kKkDAytocSCZM</b>
+         1 WinSta0       CF_TEXT                          0x10 ------------------                                                   
+         1 WinSta0       0xf01c7L               0x200000000000 ------------------                                                   
+         1 WinSta0       CF_TEXT                           0x1 ------------------                                                   
+         1 ------------- ------------------            0xf01c7 0xfffff900c0199230                                                   
+</pre>
+
+<p>The clipboard contained a link to a file hosted on mega.nz, which unfortunately
+was not complete. Then I decided to run strings on the memory image to find the
+full link:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ strings evilpepo.vmem &gt; strings
+$ strings -e l evilpepo.vmem &gt; stringsl
+</code></pre></div></div>
+
+<p>The <a href="https://man7.org/linux/man-pages/man1/strings.1.html#OPTIONS"><code class="language-plaintext highlighter-rouge">-e</code> option</a>
+allows to set a different encoding and <code class="language-plaintext highlighter-rouge">l</code> specifies 16-bit littlendian. I used
+it here because Windows is very fond of
+<a href="https://en.wikipedia.org/wiki/UTF-16">UTF-16</a>.</p>
+
+<p>I then looked for another instance of the mega link in the strings outputs:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ grep mega.nz strings
+https://mega.nz/file/m18HSSaJ#_4Gmn4aWnrKN2716fMdSQogECaGsS5kKkDAytocSCZM
+mega.nz/file/m18HSSaJ#_4Gmn4aWnrKN2716fMdSQogECaGsS5kKkDAytocSCZMn and which is
+governed
+https://mega.nz/file/m18HSSaJ#_4Gmn4aWnrKN2716fMdSQogECaGsS5kKkDAytocSCZM
+https://mega.nz/file/m18HSSaJ#_4Gmn4aWnrKN2716fMdSQogECaGsS5kKkDAytocSCZM
+https://mega.nz/file/m18HSSaJ#_4Gmn4aWnrKN2716fMdSQogECaGsS5kKkDAytocSCZM008-2012
+TrueCrypt Developers Association and which is governed
+</code></pre></div></div>
+
+<p>This
+<a href="https://mega.nz/file/m18HSSaJ#_4Gmn4aWnrKN2716fMdSQogECaGsS5kKkDAytocSCZM">linked</a>
+to a file named <code class="language-plaintext highlighter-rouge">secret</code> which didn’t seem to have any known format. Looking at
+it through the entropy filter revealed that it was probably encrypted:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ file secret
+secret: data
+</code></pre></div></div>
+
+<p><img src="/assets/files/trollcatCTF21/evilpepo_secret_entropy.png" alt="secret entropy" /></p>
+
+<p>This meant that some kind of key or password had to be found to be able to
+decrypt it.</p>
+
+<p>Because the description of Mr_evilpepo_2 mentions “something [hidden] on the
+internet”, I looked at the volatility plug-ins that could have something to do
+with web browsing and I found <code class="language-plaintext highlighter-rouge">iehistory</code>:</p>
+
+<pre>
+$ volatility -f evilpepo.vmem --profile=Win7SP1x64 iehistory | grep Location
+Location: http://www.bing.com/favicon.ico
+Location: https://www.mozilla.org/media/img/favicons/firefox/browser/favicon.f093404c0135.ico
+Location: https://www.google.com/chrome/static/images/favicons/favicon.ico
+Location: :2021011220210113: WhiteWolf@http://www.bing.com/search?q=firefox&amp;src=IE-SearchBox&amp;FORM=IE8SRC
+Location: :2021011220210113: WhiteWolf@:Host: www.bing.com
+Location: :2021011220210113: WhiteWolf@https://www.mozilla.org/en-US/firefox/new
+Location: :2021011220210113: WhiteWolf@:Host: www.mozilla.org
+Location: :2021011220210113: WhiteWolf@https://www.mozilla.org/en-US/firefox/download/thanks
+Location: :2021011220210113: WhiteWolf@https://download-installer.cdn.mozilla.net/pub/firefox/releases/84.0.2/win32/en-US/Firefox%20Installer.exe
+Location: :2021011220210113: WhiteWolf@:Host: download-installer.cdn.mozilla.net
+Location: :2021011220210113: WhiteWolf@:Host: dl.google.com
+Location: :2021011220210113: WhiteWolf@http://www.bing.com/search?q=chrome&amp;src=IE-SearchBox&amp;FORM=IE8SRC
+Location: :2021011220210113: WhiteWolf@file:///C:/Users/WhiteWolf/Documents/note.txt
+Location: :2021011220210113: WhiteWolf@:Host: Computer
+Location: :2021011220210113: WhiteWolf@file:///B:/note.txt
+Location: :2021011220210113: WhiteWolf@file:///C:/Users/WhiteWolf/Documents/mysecret.txt
+Location: :2021011220210113: WhiteWolf@file:///C:/Users/WhiteWolf/Documents/secret.txt
+Location: :2021011220210113: WhiteWolf@file:///C:/Users/WhiteWolf/Downloads/flag.png
+Location: :2021011220210113: WhiteWolf@file:///C:/Users/WhiteWolf/Documents/mysecret.txt
+Location: :2021011220210113: WhiteWolf@https://dl.google.com/tag/s/appguid%3D%7B8A69D345-D564-463C-AFF1-A69D9E530F96%7D%26iid%3D%7B25511070-6CC0-180D-823B-829C28B8EFDF%7D%26lang%3Den%26browser%3D2%26usagestats%3D0%26appname%3DGoogle%2520Chrome%26needsadmin%3Dprefers%26ap%3Dx64-stable-statsdef_1%26installdataindex%3Dempty/update2/installers/ChromeSetup.exe
+Location: :2021011220210113: WhiteWolf@file:///C:/Users/WhiteWolf/Documents/secret.hc
+Location: :2021011220210113: WhiteWolf@file:///C:/Users/WhiteWolf/Documents/secret.png.hc
+Location: :2021011220210113: WhiteWolf@file:///B:/foryou.txt
+Location: :2021011220210113: WhiteWolf@file:///C:/Users/WhiteWolf/Documents/Database.kdbx
+Location: Visited: WhiteWolf@https://ieonline.microsoft.com/favicon.ico
+Location: Visited: WhiteWolf@https://www.msn.com/?ocid=iehp
+Location: Visited: WhiteWolf@https://static-global-s-msn-com.akamaized.net/hp-eas/sc/2b/a5ea21.ico
+Location: Visited: WhiteWolf@http://go.microsoft.com/fwlink/?LinkId=69157
+Location: Visited: WhiteWolf@http://www.bing.com/search?format=rss&amp;q=firefox&amp;src=IE-SearchBox&amp;FORM=IE8SRC
+Location: Visited: WhiteWolf@file:///C:/Users/WhiteWolf/Documents/note.txt
+Location: Visited: WhiteWolf@https://www.msn.com/en-in/?ocid=iehp
+Location: Visited: WhiteWolf@https://www.google.com/chrome/thank-you.html?statcb=0&amp;installdataindex=empty&amp;defaultbrowser=0
+Location: Visited: WhiteWolf@http://www.bing.com/search?q=chrome&amp;src=IE-SearchBox&amp;FORM=IE8SRC
+Location: Visited: WhiteWolf@https://www.google.com/intl/en/chrome
+Location: Visited: WhiteWolf@http://www.bing.com/search?q=firefox&amp;src=IE-SearchBox&amp;FORM=IE8SRC
+Location: Visited: WhiteWolf@file:///B:/note.txt
+Location: Visited: WhiteWolf@https://www.google.com/chrome/static/images/favicons/favicon.ico
+Location: Visited: WhiteWolf@http://www.bing.com/search?format=rss&amp;q=chrome&amp;src=IE-SearchBox&amp;FORM=IE8SRC
+Location: Visited: WhiteWolf@https://www.mozilla.org/en-US/firefox/new
+Location: Visited: WhiteWolf@https://www.mozilla.org/en-US/firefox/download/thanks
+Location: Visited: WhiteWolf@https://download-installer.cdn.mozilla.net/pub/firefox/releases/84.0.2/win32/en-US/Firefox%20Installer.exe
+Location: Visited: WhiteWolf@https://www.google.com/chrome
+Location: Visited: WhiteWolf@https://www.google.com/chrome/thank-you.html?statcb=0&amp;installdataindex=empty&amp;defaultbrowser=0
+Location: Visited: WhiteWolf@https://dl.google.com/tag/s/appguid%3D%7B8A69D345-D564-463C-AFF1-A69D9E530F96%7D%26iid%3D%7B25511070-6CC0-180D-823B-829C28B8EFDF%7D%26lang%3Den%26browser%3D2%26usagestats%3D0%26appname%3DGoogle%2520Chrome%26needsadmin%3Dprefers%26ap%3Dx64-stable-statsdef_1%26installdataindex%3Dempty/update2/installers/ChromeSetup.exe
+Location: Visited: WhiteWolf@file:///C:/Users/WhiteWolf/Documents/mysecret.txt
+Location: Visited: WhiteWolf@file:///C:/Users/WhiteWolf/Documents/secret.txt
+Location: Visited: WhiteWolf@file:///C:/Users/WhiteWolf/Downloads/flag.png
+Location: Visited: WhiteWolf@file:///C:/Users/WhiteWolf/Documents/mysecret.txt
+Location: Visited: WhiteWolf@file:///C:/Users/WhiteWolf/Documents/secret.hc
+Location: Visited: WhiteWolf@file:///C:/Users/WhiteWolf/Documents/secret.png.hc
+Location: Visited: WhiteWolf@file:///B:/foryou.txt
+Location: Visited: WhiteWolf@file:///C:/Users/WhiteWolf/Documents/Database.kdbx
+</pre>
+
+<p>We can see from the <code class="language-plaintext highlighter-rouge">iehistory</code> output that Mr. EvilPepo went on the Chrome and
+Firefox download pages, and that he looked at a few files that look suspicious:</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">Database.kdbx</code> (<a href="https://keepass.info/">KeePass</a> database)</li>
+  <li><code class="language-plaintext highlighter-rouge">flag.png</code></li>
+  <li><code class="language-plaintext highlighter-rouge">foryou.txt</code></li>
+  <li><code class="language-plaintext highlighter-rouge">mysecret.txt</code></li>
+  <li><code class="language-plaintext highlighter-rouge">note.txt</code></li>
+  <li><code class="language-plaintext highlighter-rouge">secret.hc</code> (<a href="https://www.veracrypt.fr">VeraCrypt</a> Container File)</li>
+  <li><code class="language-plaintext highlighter-rouge">secret.png.hc</code> (<a href="https://www.veracrypt.fr">VeraCrypt</a> Container File)</li>
+  <li><code class="language-plaintext highlighter-rouge">secret.txt</code></li>
+</ul>
+
+<p>In order to recover those files, I ran the <code class="language-plaintext highlighter-rouge">filescan</code> plug-in:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ volatility -f evilpepo.vmem --profile=Win7SP1x64 filescan
+Offset(P)            #Ptr   #Hnd Access Name
+------------------ ------ ------ ------ ----
+...
+0x000000003d8cdd90     16      0 R--rw- \Device\HarddiskVolume1\Users\WhiteWolf\Documents\mysecret.txt
+...
+</code></pre></div></div>
+
+<p>however, I could only find <code class="language-plaintext highlighter-rouge">mysecret.txt</code> from the list of files that had been
+found by iehistory. I then dumped the file:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ mkdir files
+$ volatility -f evilpepo.vmem --profile=Win7SP1x64 dumpfiles -Q 0x000000003d8cdd90 -D files
+$ cat files/file.None.0xfffffa8000e7fe10.dat
+https://mega.nz/file/m18HSSaJ#_4Gmn4aWnrKN2716fMdSQogECaGsS5kKkDAytocSCZM
+</code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">mysecret.txt</code> only contained the link to the <code class="language-plaintext highlighter-rouge">secret</code> file which we had already
+found.</p>
+
+<p>In the filenames collected from <code class="language-plaintext highlighter-rouge">iehistory</code>, there were VeraCrypt files. Due
+to VeraCrypt being a fork of TrueCrypt, I tried running the volatility plug-ins
+for TrueCrypt (<code class="language-plaintext highlighter-rouge">truecryptmaster</code>, <code class="language-plaintext highlighter-rouge">truecryptpassphrase</code> &amp; <code class="language-plaintext highlighter-rouge">truecryptsummary</code>),
+which unfortunately gave empty results:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ volatility -f evilpepo.vmem --profile=Win7SP1x64 truecryptmaster
+Volatility Foundation Volatility Framework 2.6.1
+$ volatility -f evilpepo.vmem --profile=Win7SP1x64 truecryptpassphrase
+Volatility Foundation Volatility Framework 2.6.1
+$ volatility -f evilpepo.vmem --profile=Win7SP1x64 truecryptsummary
+Volatility Foundation Volatility Framework 2.6.1
+</code></pre></div></div>
+
+<p>I wasn’t sure if that was because these plug-ins were not designed to work with
+VeraCrypt (in addition to TrueCrypt) or because the data necessary for these
+plug-ins to work wasn’t present in the memory dump.</p>
+
+<p>I then continued with the usual memory forensics procedures: <code class="language-plaintext highlighter-rouge">psscan</code> and
+<code class="language-plaintext highlighter-rouge">hashdump</code>. <code class="language-plaintext highlighter-rouge">psscan</code> revealed that KeePass.exe was running. So I tried to dump
+its memory with the hope of being able to find passwords in there.
+Unfortunately, that didn’t bring anything fruitful.</p>
+
+<p>Running <code class="language-plaintext highlighter-rouge">hashdump</code> revealed some hashes, however, after running them through
+<a href="https://www.openwall.com/john/">John the Ripper</a>, they turned out the be empty
+(or so I thought).</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ volatility -f evilpepo.vmem --profile=Win7SP1x64 --output-file=hashdump hashdump
+$ cat hashdump
+Administrator:500:aad3b435b51404eeaad3b435b51404ee:31d6cfe0d16ae931b73c59d7e0c089c0:::
+Guest:501:aad3b435b51404eeaad3b435b51404ee:31d6cfe0d16ae931b73c59d7e0c089c0:::
+WhiteWolf:1000:aad3b435b51404eeaad3b435b51404ee:2e6a7cf5aabb33a044684dd9c97e88a7:::
+$ john hashdump
+Warning: detected hash type "LM", but the string is also recognized as "NT"
+Use the "--format=NT" option to force loading these as that type instead
+Warning: detected hash type "LM", but the string is also recognized as "LM-opencl"
+Use the "--format=LM-opencl" option to force loading these as that type instead
+Warning: detected hash type "LM", but the string is also recognized as "NT-opencl"
+Use the "--format=NT-opencl" option to force loading these as that type instead
+Using default input encoding: UTF-8
+Using default target encoding: CP850
+Loaded 3 password hashes with no different salts (LM [DES 128/128 AVX])
+Warning: poor OpenMP scalability for this hash type, consider --fork=8
+Will run 8 OpenMP threads
+Proceeding with single, rules:Single
+Press 'q' or Ctrl-C to abort, almost any other key for status
+Almost done: Processing the remaining buffered candidate passwords, if any.
+Warning: Only 661 candidates buffered for the current salt, minimum 1024 needed for performance.
+Proceeding with wordlist:/usr/share/john/password.lst, rules:Wordlist
+                 (WhiteWolf)
+                 (Guest)
+                 (Administrator)
+3g 0:00:00:00 DONE 2/3 (2021-02-06 18:36) 6.382g/s 72531p/s 72531c/s 217595C/s 123456..GATOR6
+Use the "--show --format=LM" options to display all of the cracked passwords reliably
+Session completed
+</code></pre></div></div>
+
+<p>I then continued through the list of volatility plug-ins in the hope of finding
+something interesting. I ran the <code class="language-plaintext highlighter-rouge">screenshot</code> plug-in which revealed that notepad
+was open, however, that brought nothing new to light as <code class="language-plaintext highlighter-rouge">mysecret.txt</code> was the
+opened file which we already knew the content of (the mega link).</p>
+
+<p><img src="/assets/files/trollcatCTF21/session_1.WinSta0.Default.png" alt="destop screenshot" /></p>
+
+<p>I wasn’t making progress anymore, so I decided to search how to find
+credentials and passwords in a memory dump and I found <a href="https://www.aldeid.com/wiki/Volatility/Retrieve-password">a
+tutorial</a> that used
+<code class="language-plaintext highlighter-rouge">hivelist</code> and <code class="language-plaintext highlighter-rouge">hivedump</code> to retrieve windows hashes. Not really knowing what
+to do, I ran them:</p>
+
+<pre>
+$ volatility -f evilpepo.vmem --profile=Win7SP1x64 hivelist
+Virtual            Physical           Name
+------------------ ------------------ ----
+0xfffff8a001162010 0x0000000038629010 \??\C:\System Volume Information\Syscache.hve
+0xfffff8a005990010 0x000000001689c010 \SystemRoot\System32\Config\DEFAULT
+0xfffff8a00000f010 0x00000000272e5010 [no name]
+<b>0xfffff8a000024010 0x00000000272b0010 \REGISTRY\MACHINE\SYSTEM</b>
+0xfffff8a000052010 0x000000002729e010 \REGISTRY\MACHINE\HARDWARE
+0xfffff8a0000f3010 0x000000001b8c1010 \SystemRoot\System32\Config\SOFTWARE
+0xfffff8a0005e8010 0x0000000034bc0010 \Device\HarddiskVolume1\Boot\BCD
+0xfffff8a0008f2230 0x000000003a6c5230 \SystemRoot\System32\Config\SECURITY
+<b>0xfffff8a0009c3010 0x000000000eea4010 \REGISTRY\MACHINE\SAM</b>
+0xfffff8a000a4e010 0x000000000f73d010 \??\C:\Windows\ServiceProfiles\NetworkService\NTUSER.DAT
+0xfffff8a000aca410 0x000000000f5f8410 \??\C:\Windows\ServiceProfiles\LocalService\NTUSER.DAT
+0xfffff8a000e19010 0x0000000003f66010 \??\C:\Users\WhiteWolf\ntuser.dat
+0xfffff8a000e57010 0x0000000003f6a010 \??\C:\Users\WhiteWolf\AppData\Local\Microsoft\Windows\UsrClass.dat
+$ volatility -f evilpepo.vmem --profile=Win7SP1x64 hivedump -y 0xfffff8a0009c3010 -y 0xfffff8a000024010 &gt; hashes.txt
+$ cat hashes.txt
+Administrator:500:aad3b435b51404eeaad3b435b51404ee:31d6cfe0d16ae931b73c59d7e0c089c0:::
+Guest:501:aad3b435b51404eeaad3b435b51404ee:31d6cfe0d16ae931b73c59d7e0c089c0:::
+WhiteWolf:1000:aad3b435b51404eeaad3b435b51404ee:<b>2e6a7cf5aabb33a044684dd9c97e88a7</b>:::
+</pre>
+
+<p>This tutorial used NTLM hashes instead of LANMAN ones and that’s when I realised
+that the NTLM hash for WhiteWolf wasn’t empty and that I had missed it when I
+ran <code class="language-plaintext highlighter-rouge">hashdump</code> earlier.</p>
+
+<p>Using <a href="https://crackstation.net">crackstation</a> I cracked the password:
+<code class="language-plaintext highlighter-rouge">abracadabra</code>.</p>
+
+<p>Now with a password in hand, I tried to decrypt the <code class="language-plaintext highlighter-rouge">secret</code> file with
+VeraCrypt. I went for VeraCrypt first because the file <code class="language-plaintext highlighter-rouge">secret</code> didn’t have any
+recognizable format so I didn’t think it would be possible to open it with
+KeePass.</p>
+
+<video controls="true">
+  <source src="/assets/files/trollcatCTF21/veracrypt.mp4" />
+</video>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ cat /mnt/veracrypt1/foryou.txt
+Trollcat{y0u_got_n1ce_Skills!!!}
+</code></pre></div></div>
+
+<p>This turned out to be the flag for Mr_evilpepo_3 which meant that something was
+meant by “something being hidden on the internet” other than just a file being
+hosted on mega.nz.</p>
+
+<p>So I tried to extract data from the browsers that had been installed. I ran the
+<a href="https://github.com/volatilityfoundation/community/blob/master/DaveLasalle/chromehistory.py">community plug-ins for
+chrome</a>
+following <a href="https://blog.superponible.com/2014/08/31/volatility-plugin-chrome-history/">this
+tutorial</a>:</p>
+
+<p>After running <code class="language-plaintext highlighter-rouge">chromehistory</code> &amp; <code class="language-plaintext highlighter-rouge">chromevisits</code> with no output, I ran
+<code class="language-plaintext highlighter-rouge">chromesearchterms</code> which gave some results:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ volatility --plugins ~/plugins -f evilpepo.vmem --profile=Win7SP1x64 chromesearchterms
+Row ID Keyword ID URL ID Lowercase                                                        Entered Text                                                    
+------ ---------- ------ ---------------------------------------------------------------- ----------------------------------------------------------------
+    26          2     54 trollcat memes                                                   trollcat memes                                                  
+    25          2     53 trollcat memes                                                   trollcat memes                                                  
+    24          2     52 trollcat memes                                                   trollcat memes                                                  
+    23          2     51 trollcat memes                                                   trollcat memes                                                  
+    22          2     50 trollcat memese                                                  trollcat memese                                                 
+    21          2     49 veracrypt                                                        veracrypt                                                       
+    20          2     45 keepass                                                          keepass                                                         
+    19          2     44 trollcats ctf                                                    trollcats ctf                                                   
+    18          2     39 keepass download                                                 keepass download                                                
+    17          2     35 trollcats meme                                                   trollcats meme                                                  
+    16          2     32 trollcats meme                                                   trollcats meme                                                  
+    15          2     31 trollcats meme                                                   trollcats meme                                                  
+    14          2     30 trollcats meme                                                   trollcats meme                                                  
+    13          2     27 trollcats meme                                                   trollcats meme                                                  
+    12          2     26 trollcats ctf                                                    trollcats ctf                                                   
+    11          2     24 memes on ctf                                                     memes on ctf                                                    
+    10          2     19 password protected pastebin                                      password protected pastebin                                     
+     9          2     14 veracrypt                                                        veracrypt                                                       
+     8          2     13 truecrypt                                                        truecrypt                                                       
+     7          2     10 ctf memes                                                        ctf memes                                                       
+     6          2      9 ctf memes                                                        ctf memes                                                       
+     5          2      8 malware samplew                                                  malware samplew                                                 
+     4          2      7 malware                                                          malware                                                         
+     3          2      5 ctf memes                                                        ctf memes                                                       
+     2          2      2 trollcats ctf                                                    trollcats ctf                                                   
+     9       5135     13 
+</code></pre></div></div>
+
+<p>Looking at the results, it seemed that Mr. EvilPepo had installed KeePass &amp;
+VeraCrypt and had searched for memes. I thought that maybe some of these search
+terms were passwords. Something else that seemed interesting was “password
+protected pastebin”. In order to find if Mr. EvilPepo had been on some some
+kind of pastebin website, I searched for “paste” in the strings output that I
+had prepared earlier:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ grep -i paste strings
+...
+Defuse Security's Encrypted Pastebin defuse.ca/b/sOOqp4UunTdD0oUjidJFlz location from history
+...
+</code></pre></div></div>
+
+<p>Going on this link, the interface was a bit confusing, but eventually I
+inputted the password I had cracked earlier and clicked “Decrypt” which
+revealed the flag:</p>
+
+<p><img src="/assets/files/trollcatCTF21/defuse.ca-pastebin.png" alt="Defuse.ca pastebin" /></p>
+
+<h3 id="cryptography">Cryptography</h3>
+
+<h4 id="radio-station-apocalypse-457-pts-34-solves">Radio Station Apocalypse (457 pts 34 solves)</h4>
+
+<h5 id="description-4">Description</h5>
+
+<p>Bob is trying to stop a Apocalypse can u help him decode his output</p>
+
+<p><a href="https://cdn.discordapp.com/attachments/782656136976662539/807548896460144680/ciphertext.txt">File</a>
+Author : Wh1t3r0se</p>
+
+<h5 id="solution-4">Solution</h5>
+
+<p>This is an RSA challenge, as is implied by the name of the challenge which
+forms the acronym RSA. If we look at the content of the file given, we are
+given <code class="language-plaintext highlighter-rouge">ct</code> (the cihpertext<code class="language-plaintext highlighter-rouge">, </code>e<code class="language-plaintext highlighter-rouge">, </code>n<code class="language-plaintext highlighter-rouge"> and </code>p - q`.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ct= 15927954374690152068700390298074593196253864077169207071831999310211243220084198633824761313226756137217716813832139827281860280786151119392571330914043785795154126460993477079312886238477507766509831010644388998659565303441719615131661670116956449101956505931748018171190878765731317846254607404813297135537090043417404895660853320127812799010027005785901634939020872408881201149711968120809368691413105318444873712717786940780346214959475833457688794871749017822337860503424073668090333543027469770960756536095503271163592383252371337847620140632398753943463160733918860277382675572411402618882039992721158705125550
+e= 65537
+n= 25368447768323504911600571988774494107818159082103458909402378375896888147122503938518591402940401613482043710928629612450119548224453500663121617535722112844472859040198762641907836363229969155712075958868854330020410559684508712810222293531147857306199021834554435068975911739307607540505629883798642466233546635096780559373979170475222394473493457660803818950607714830510840577490628849303933022437114380092662378432401109413796410640006146844170094240232072224662551989418393330140325743682017287713705780111627575953826016488999945470058220771848171583260999599619753854835899967952821690531655365651736970047327
+(p-q)= 13850705243110859039354321081017038361100285164728565071420492338985283998938739255457649493117185659009054998475484599174052182163568940357425209817392780314915968465598416149706099257132486744034100104272832634714470968608095808094711578599330447351992808756520378741868674695777659183569180981300608614286
+</code></pre></div></div>
+
+<p>Because <a href="https://en.wikipedia.org/wiki/RSA_(cryptosystem)#Key_generation">p x q =
+n</a>, we can work
+out the value of p and q and then use RsaCtfTool to workout the plaintext. p - q
+is substitued by b for better clarity.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>p - q = b
+p x q = n
+p = b + q
+q x (b + q) = n
+bq + q^2 = n
+0 = q^2 + bq - n
+</code></pre></div></div>
+
+<p>We can then use the quadratic equation to workout the value of q, substituting
+<code class="language-plaintext highlighter-rouge">a</code> with 1 and <code class="language-plaintext highlighter-rouge">c</code> with <code class="language-plaintext highlighter-rouge">-n</code>;</p>
+
+<p><img src="https://wikimedia.org/api/rest_v1/media/math/render/svg/00c22777378f9c594c71158fea8946f2495f2a28" alt="Quadratic equation" /></p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&gt;&gt;&gt; from math import isqrt
+&gt;&gt;&gt; c = -25368447768323504911600571988774494107818159082103458909402378375896888147122503938518591402940401613482043710928629612450119548224453500663121617535722112844472859040198762641907836363229969155712075958868854330020410559684508712810222293531147857306199021834554435068975911739307607540505629883798642466233546635096780559373979170475222394473493457660803818950607714830510840577490628849303933022437114380092662378432401109413796410640006146844170094240232072224662551989418393330140325743682017287713705780111627575953826016488999945470058220771848171583260999599619753854835899967952821690531655365651736970047327
+&gt;&gt;&gt; b = 13850705243110859039354321081017038361100285164728565071420492338985283998938739255457649493117185659009054998475484599174052182163568940357425209817392780314915968465598416149706099257132486744034100104272832634714470968608095808094711578599330447351992808756520378741868674695777659183569180981300608614286
+&gt;&gt;&gt; (-b + isqrt(b*b - 4*c)) // 2
+152499890916776320998653744133858053858040491195676367580833765685801465668550782030624978780895730483048668416204723476732936549664363014792241110103591722802722925811679026916136070136123358563999687916468289972321939237538498300991215059941344271955912443135643418740974797112808138286922920053490440910781
+&gt;&gt;&gt; q = _
+&gt;&gt;&gt; (-b - isqrt(b*b - 4*c)) // 2
+-166350596159887180038008065214875092219140776360404932652254258024786749667489521286082628274012916142057723414680208075906988731827931955149666319920984503117638894277277443065842169393255845308033788020741122607036410206146594109085926638540674719307905251892163797482843471808585797470492101034791049525067
+&gt;&gt;&gt; b + q
+166350596159887180038008065214875092219140776360404932652254258024786749667489521286082628274012916142057723414680208075906988731827931955149666319920984503117638894277277443065842169393255845308033788020741122607036410206146594109085926638540674719307905251892163797482843471808585797470492101034791049525067
+</code></pre></div></div>
+
+<p>The second value of q is invalid because it is negative. We can now recover the
+flag with RsaCtfTool:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ ./RsaCtfTool.py -n 25368447768323504911600571988774494107818159082103458909402378375896888147122503938518591402940401613482043710928629612450119548224453500663121617535722112844472859040198762641907836363229969155712075958868854330020410559684508712810222293531147857306199021834554435068975911739307607540505629883798642466233546635096780559373979170475222394473493457660803818950607714830510840577490628849303933022437114380092662378432401109413796410640006146844170094240232072224662551989418393330140325743682017287713705780111627575953826016488999945470058220771848171583260999599619753854835899967952821690531655365651736970047327 -q 152499890916776320998653744133858053858040491195676367580833765685801465668550782030624978780895730483048668416204723476732936549664363014792241110103591722802722925811679026916136070136123358563999687916468289972321939237538498300991215059941344271955912443135643418740974797112808138286922920053490440910781 -p 166350596159887180038008065214875092219140776360404932652254258024786749667489521286082628274012916142057723414680208075906988731827931955149666319920984503117638894277277443065842169393255845308033788020741122607036410206146594109085926638540674719307905251892163797482843471808585797470492101034791049525067 -e 65537 --uncipher 15927954374690152068700390298074593196253864077169207071831999310211243220084198633824761313226756137217716813832139827281860280786151119392571330914043785795154126460993477079312886238477507766509831010644388998659565303441719615131661670116956449101956505931748018171190878765731317846254607404813297135537090043417404895660853320127812799010027005785901634939020872408881201149711968120809368691413105318444873712717786940780346214959475833457688794871749017822337860503424073668090333543027469770960756536095503271163592383252371337847620140632398753943463160733918860277382675572411402618882039992721158705125550
+private argument is not set, the private key will not be displayed, even if recovered.
+
+Results for /tmp/tmppp_dbgob:
+
+Unciphered data :
+HEX : 0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000054726f6c6c6361747b5235415f31735f6e30745f546834745f657a7a7a217d
+INT (big endian) : 149204956497314283531004000320684448716640924972648922878294856785599275389
+INT (little endian) : 15796296950557221415783762244626704143186169113285087066722606455844897452964263215436184675224001692315898503209630264108817821134614017492161331444317520492797791539292766800947714681482709495990343928210560879801674983399333011288367509272053239135934383481406159082629868176870350052856035395954404064497290589345884131037586767896214701297772275738237520867935196019143092985144518387329511892766048340328235533409456647218964988372542436526503309580941177438626896784235082191112827629976796687195880133295116412280987396840610920835224261701846594894665827049039141293688389375132934600845020652935017140322304
+STR : b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00Trollcat{R5A_1s_n0t_Th4t_ezzz!}'
+</code></pre></div></div>
+
+<p>Thanks to Uzay for helping to solve this challenge.</p>
+
+<h3 id="networking">Networking</h3>
+
+<h4 id="free-wifi-316-pts-69-solves">FREE WIFI (316 pts 69 solves)</h4>
+
+<h5 id="description-5">Description</h5>
+
+<p>I left my raspberry at starbucks this morning, here is the captured traffic.
+Find me the Password of the wifi.</p>
+
+<p><a href="https://drive.google.com/file/d/16JLMczQILRNGxLtrR0zacfGmU6i9d5Vz/view?usp=sharing">File</a></p>
+
+<p>Flag format: Trollcat{password}</p>
+
+<h5 id="solution-5">Solution</h5>
+
+<p>We are given a <a href="https://en.wikipedia.org/wiki/Pcap">pcap</a> containing WIFI
+traffic and are told to find the password. To crack the passphrase from a
+captured handshake (in order to be able to crack WPA a handshake must be
+captured) we can use <a href="https://en.wikipedia.org/wiki/Aircrack-ng"><code class="language-plaintext highlighter-rouge">aircrack-ng</code></a>:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ aircrack-ng -w ~/rockyou.txt ./hack1-01.cap
+</code></pre></div></div>
+
+<p>Here I used the popular <a href="https://crackstation.net/crackstation-wordlist-password-cracking-dictionary.htm">rockyou
+wordlist</a>
+as my password wordlist.</p>
+
+<h5 id="flag-1">Flag</h5>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Trollcat{no1caredformelikejesus}
+</code></pre></div></div>
+
+<h4 id="i-am-so-sed-500-pts-1-solve-me-">I am so sed (500 pts 1 solve (me 😊))</h4>
+
+<h5 id="description-6">Description</h5>
+
+<p>My neighbour knew about our CTF and Rocked his password ! Please help me get
+access to the WIFI.</p>
+
+<p><a href="https://drive.google.com/file/d/1noJC5bLrOPJjU62Zh4WQjqQG90tS-qBU/view?usp=sharing">link</a>
+Flag Format: TROLLCAT{PASSWORD}</p>
+
+<p>Author: dboidembla</p>
+
+<h5 id="solution-6">Solution</h5>
+
+<p>Reading the description of this challenge, it seemed similar to FREE WIFI: you
+were given a pcap and had to crack the password of the wifi network which the
+traffic came from. One thing that I noticed was that the neighbour
+“<strong><em>Rocked</em></strong>” the password, which is a reference to the rockyou wordlist. So I
+ran the same command as I did for FREE WIFI however the password was not found
+which meant that despite what I had inferred from the description, the password
+was not contained within the rockyou wordlist. I thought about applying rules,
+to the aforementioned list, however, considering how long it had taken to crack
+the password for FREE WIFI (about 5 minutes), I thought that adding on rules to
+the list would make the number of possible passwords too large and it would
+infeasible to crack it.</p>
+
+<p>I moved on to another challenge as I didn’t know how to proceed.</p>
+
+<p>After some time, I went back to the challenge and noticed something in the
+description, it mentioned that the “neighbour knew about our CTF”, insinuating
+that the password was changed in accordance to it. This suggested they had set
+their Wi-Fi password to the full flag (with the flag format). So I used <code class="language-plaintext highlighter-rouge">sed</code> to
+add the flag format to each password in the rockyou wordlist.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ sed -e 's/^/TROLLCAT{/' -e 's/$/}/' ~/rockyou.txt &gt; rockyou_troll.txt
+</code></pre></div></div>
+
+<p>Because the flag format was all in upper case letters (in the challenge
+description), I thought that it was likely that the password didn’t contain any
+lower case letters and used grep to shrink the wordlist and crack the password:</p>
+
+<pre>
+$ grep -v [[:lower:]] rockyou_troll.txt &gt; rockyou_troll_upper.txt
+$ aircrack-ng -w rockyou_troll_upper.txt hack2.cap-01.cap
+                               Aircrack-ng 1.6
+
+      [00:00:00] 178/3090558 keys tested (6168.53 k/s)
+
+      Time left: 8 minutes, 21 seconds                           0.01%
+
+                        KEY FOUND! [ <b>TROLLCAT{11111}</b> ]
+
+
+      Master Key     : 55 45 F3 11 E8 4C 8E 8B 90 61 9B DA B8 32 26 06
+                       60 83 FE 5B 2A 78 6D 26 D1 0E 8F 28 75 9F 3A 4E
+
+      Transient Key  : 2D 4D B1 07 A0 F7 CE 82 6D D3 31 F7 01 84 BB 88
+                       20 A2 99 BF B4 32 EF ED 41 51 C3 F4 DC 4F 18 B7
+                       43 8C D7 6C D7 E8 91 81 DB 7E 00 00 00 00 00 00
+                       00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+
+      EAPOL HMAC     : 58 18 DB 3A DF B9 01 3E C5 6F A8 5D 4D E8 C2 BA
+</pre>
+
+<h4 id="granny-wants-you-496-pts-12-solves">Granny wants you (496 pts 12 solves)</h4>
+
+<h5 id="description-7">Description</h5>
+
+<p>Help my granny login, while monitoring my network one day I was able to capture
+the credentials, go through this file to get ther credentials</p>
+
+<p><a href="https://drive.google.com/file/d/1l8fUvacESSTX32InO_87x4RBIXIiNVcD/view?usp=sharing">link</a></p>
+
+<p>Flag format : username:password ( no – {} ) Author: dboidembla</p>
+
+<h5 id="solution-7">Solution</h5>
+
+<p>When opening the pcap in wireshark, there are 338410 packets, way too many for
+all of them to analysed. Looking at the description, I figured that the most
+likely way for credentials to be sent over the network by “granny” was over
+HTTP, and more specifically, a HTTP POST request. So I used the filter
+<code class="language-plaintext highlighter-rouge">http.request.method == "POST"</code> to filter only POST requests, leaving only 5
+remaining packets…</p>
+
+<p>All of the POST requests were to <code class="language-plaintext highlighter-rouge">testphp.vulnweb.com/userinfo.php</code> and had a
+<code class="language-plaintext highlighter-rouge">uname</code> and <code class="language-plaintext highlighter-rouge">pass</code> field:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>uname=notthis&amp;pass=bG9sTjAwYg%3D%3D
+uname=eW91X3JlYWxseV90aG91Z2h0X3RoaXNfd2FzX2l0&amp;pass=xrrc_qernzvat
+uname=next_one_for_sure_or_this_one&amp;pass=aV9kb250X2tub3dfbWF5YmU%3D
+uname=E0IPJIyDGxq2Mx56oz12LKD%3D&amp;pass=01001001+00110010+01001001+01100110+01001100+00110010+00111001+01100111+01001101+01001001+00111001+00110000+01101111+00110001+00111001+01010001+01001000+00110000+01000001+01101001+01001101+01010100+01001001+01101100+01110000+00110010+01110101+00110001+01001100+01110100+00111101+00111101
+uname=E0IPJIyDGxq2Mx56oz12LKD%3D&amp;pass=01001001+00110010+01001001+01100110+01001100+00110010+00111001+01100111+01001101+01001001+00111001+00110000+01101111+00110001+00111001+01010001+01001000+00110000+01000001+01101001+01001101+01010100+01001001+01101100+01110000+00110010+01110101+00110001+01001100+01110100+00111101+00111101
+</code></pre></div></div>
+
+<p>Using <a href="https://gchq.github.io/CyberChef/">CyberChef</a>, it was possible to modify
+the <code class="language-plaintext highlighter-rouge">uname</code> and <code class="language-plaintext highlighter-rouge">pass</code> until they looked a bit more natural. In this case the
+correct password was in the last 2 requests (they’re the same):</p>
+
+<ul>
+  <li><a href="https://gchq.github.io/CyberChef/#recipe=URL_Decode()From_Base64('N-ZA-Mn-za-m0-9%2B/%3D',true)ROT13(true,true,false,13)&amp;input=RTBJUEpJeURHeHEyTXg1Nm96MTJMS0QlM0Q">https://gchq.github.io/CyberChef/#recipe=URL_Decode()From_Base64('N-ZA-Mn-za-m0-9%2B/%3D',true)ROT13(true,true,false,13)&amp;input=RTBJUEpJeURHeHEyTXg1Nm96MTJMS0QlM0Q</a></li>
+  <li><a href="https://gchq.github.io/CyberChef/#recipe=URL_Decode()From_Binary('Space',8)From_Base64('N-ZA-Mn-za-m0-9%2B/%3D',true)&amp;input=MDEwMDEwMDErMDAxMTAwMTArMDEwMDEwMDErMDExMDAxMTArMDEwMDExMDArMDAxMTAwMTArMDAxMTEwMDErMDExMDAxMTErMDEwMDExMDErMDEwMDEwMDErMDAxMTEwMDErMDAxMTAwMDArMDExMDExMTErMDAxMTAwMDErMDAxMTEwMDErMDEwMTAwMDErMDEwMDEwMDArMDAxMTAwMDArMDEwMDAwMDErMDExMDEwMDErMDEwMDExMDErMDEwMTAxMDArMDEwMDEwMDErMDExMDExMDArMDExMTAwMDArMDAxMTAwMTArMDExMTAxMDErMDAxMTAwMDErMDEwMDExMDArMDExMTAxMDArMDAxMTExMDErMDAxMTExMDE">https://gchq.github.io/CyberChef/#recipe=URL_Decode()From_Binary('Space',8)From_Base64('N-ZA-Mn-za-m0-9%2B/%3D',true)&amp;input=MDEwMDEwMDErMDAxMTAwMTArMDEwMDEwMDErMDExMDAxMTArMDEwMDExMDArMDAxMTAwMTArMDAxMTEwMDErMDExMDAxMTErMDEwMDExMDErMDEwMDEwMDErMDAxMTEwMDErMDAxMTAwMDArMDExMDExMTErMDAxMTAwMDErMDAxMTEwMDErMDEwMTAwMDErMDEwMDEwMDArMDAxMTAwMDArMDEwMDAwMDErMDExMDEwMDErMDEwMDExMDErMDEwMTAxMDArMDEwMDEwMDErMDExMDExMDArMDExMTAwMDArMDAxMTAwMTArMDExMTAxMDErMDAxMTAwMDErMDEwMDExMDArMDExMTAxMDArMDAxMTExMDErMDAxMTExMDE</a></li>
+</ul>
+
+<h5 id="flag-2">Flag</h5>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>TROLLCATisAmazing:Welcome_to_CSCodershub
+</code></pre></div></div>
+
+<h3 id="steganography">Steganography</h3>
+
+<h4 id="change-my-mind-100-pts-210-solves">Change my mind (100 pts 210 solves)</h4>
+
+<h5 id="description-8">Description</h5>
+
+<p>Change my mind <a href="https://drive.google.com/file/d/1KNqvQgkAwASizOwXiTkan4KXmoRIEj7W/view?usp=sharing">Dowload
+File</a>
+Author: MrGrep</p>
+
+<h5 id="solution-8">Solution</h5>
+
+<p>The file was an image, so I threw it in <a href="https://aperisolve.fr/">https://aperisolve.fr/</a> and got the
+flag:</p>
+
+<p><img src="/assets/files/trollcatCTF21/aperisolve.png" alt="aperisolve" /></p>
+
+<time datetime="2021-02-06">06 February 2021</time>
+
+    </main>
+    <footer>
+      &copy; 2021 <a href="https://www.nilsand.re/">Nils André</a>
+    </footer>
+  </body>
+</html>
