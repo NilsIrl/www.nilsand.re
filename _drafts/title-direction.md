@@ -29,12 +29,12 @@ information is not visible as it is truncated towards the right][5]
 We have a problem. Let's fix it!
 
 It seemed to me like the solution was standardisation, either everyone writes
-their titles so that they are readable when the text in the tab bar is left
-aligned or everyone writes them so that they are readable right aligned.
+their titles so that they are readable when the text in the tab bar is
+left-aligned or everyone writes them so that they are readable right-aligned.
 
 After some thoughts I came to the conclusion that it was preferable that all
 text inside of tab bars be written such that is was readable when the text was
-left aligned (like for the PostgreSQL website) because it allows the text to be
+right-aligned (like for the PostgreSQL website) because it allows the text to be
 written in a coherent hierarchy: from general to more specific (like is used
 for [dates][6], [paths][7], and [paths][8]) and because the (only?) reason some
 websites have the more specific information at the start of their title is
@@ -43,37 +43,49 @@ so that it is visible when the right side of the title is truncated.
 We still have a problem.
 
 It isn't practical to go against the web's (4.88 billion users) unstoppable
-momentum. Browsers don't even support displaying text right aligned in the tab
-bar (or so I thought) without an extension like Tree Style Tab.
+momentum: the standardisation dream would involve having to convince everyone
+to rewrite their website titles such that they are readable right-aligned and
+convince browser vendors to display titles differently, something that is just
+simply impossible and even if it was possible, it wouldn't necessarily be
+beneficial.
 
-The only solution that could work was to develop a browser extension that would
-have a database of websites and display the title differently depending on the
-website. If only websites could tell the browser how to display their title.
-Extending the HTML5 spec doesn't sound like a great idea.
+A second solution would be to have a per site configuration: either allow
+websites to indicate how they wish their title to be displayed or have an
+external database that is loaded on the client side using a browser extension
+or by the browser itself.
+
+Neither solutions seem within reach, the first would require to extend some
+kind of web standard, the second requires convincing browser vendors (and
+effectively extending the web standard) to make some changes as there are
+currently no APIs to change text direction from an extension.
 
 ### Panacea
 
-Except we don't need to. Whilst talking about this problem to my friend
-[Pranav][pranav], he mentioned [right-to-left scripts][9] (like Arabic and
-Hebrew) and how they manage to display their title in the right direction
-within the tab bar. And indeed he was correct:
+Except we don't need to. Everything mentioned so far assumes that there is
+currently no way to change the alignment of text in tab bars, but in fact there
+is, and I've hinted at it by referring to "text direction", because the
+solution is that:
 
 ![The tab with Arabic text is right aligned and truncated towards the left][10]
+
+Websites that use [right-to-left scripts][9] (like Arabic and Hebrew), have
+the text within title bar right-aligned.
 
 And so this leads us to our solution:
 
 ```html
-<title>&rlm;Nils's website - Hidden text in tab title</title>
+<title>&rlm;Nils's website - The ultimate solution to the nightmare of truncated tab titles</title>
 ```
 
-If you're a developer I urge you to consider having a title that has a right to
-left direction and if it's already the case, I urge you even more strongly to
-make it readable by adding a [right-to-left mark][rlm] at the beginning of your
-title. And hopefully if everyone does that, we will never have to click on
-three different tabs before we find the one we want.
+With this added to web developer's tool belt, hopefully some day, we will never
+have to click on 3 different tabs before finding the want we seek.
 
-If you prefer you can use `&#8207;`, `&#x200F`, or a [raw UTF-8 character][11]
-in HTML.
+All credit goes to my friend [Pranav][pranav], who after I mentioned the
+problem to him thought about [right-to-left scripts][9] and then was able to
+make it work.
+
+`&rlm;` is one of the ways to have a [right-to-left mark][rlm] in HTML, if you
+prefer you can also use `&#8207;`, `&#x200F`, or a [raw UTF-8 character][11].
 
 [1]: /assets/files/title-direction/tabs_ltr_same.png
 [2]: https://github.com/piroor/treestyletab
