@@ -54,7 +54,7 @@ websites to indicate how they wish their title to be displayed or have an
 external database that is loaded on the client side using a browser extension
 or by the browser itself.
 
-Neither solutions seem within reach, the first would require to extend some
+Neither solutions seem within reach, the first would require extending some
 kind of web standard, the second requires convincing browser vendors (and
 effectively extending the web standard) to make some changes as there are
 currently no APIs to change text direction from an extension.
