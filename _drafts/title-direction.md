@@ -5,7 +5,7 @@ category: [programming]
 
 ### Problem
 
-I think we've all been in this situation; whilst navigating the pages of a
+I think we've all been in this situation: whilst navigating the pages of a
 website, following links by opening new tabs, we ultimately end up with an
 unnavigable mess:
 
