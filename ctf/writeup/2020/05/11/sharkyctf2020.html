@@ -3,18 +3,18 @@
 -r--r--r-- 1 root root 2360 May 11 09:04 main.c
 -r--r--r-- 1 root root  687 May 11 09:04 semaphores.h
 -r-sr-xr-x 1 hare hare 2754 May 11 09:04 the_hare_and_the_tortoise
-</code></pre></div></div><p>Only the <code class="language-plaintext highlighter-rouge">hare</code> user has access to the flag (stored in <code class="language-plaintext highlighter-rouge">flag.txt</code>), and there’s a suid binary that I guess was compiled from the source code in <code class="language-plaintext highlighter-rouge">main.c</code>.</p><p>Here is the source code:</p><div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#include &lt;stdlib.h&gt;
-#include &lt;stdio.h&gt;
-#include &lt;fcntl.h&gt;
-#include &lt;signal.h&gt;
-#include &lt;string.h&gt;
-#include &lt;time.h&gt;
-#include &lt;unistd.h&gt;
-#include &lt;sys/types.h&gt;
-#include &lt;sys/stat.h&gt;
-#include &lt;sys/mman.h&gt;
-#include &lt;sys/ipc.h&gt;
-#include "semaphores.h"
+</code></pre></div></div><p>Only the <code class="language-plaintext highlighter-rouge">hare</code> user has access to the flag (stored in <code class="language-plaintext highlighter-rouge">flag.txt</code>), and there’s a suid binary that I guess was compiled from the source code in <code class="language-plaintext highlighter-rouge">main.c</code>.</p><p>Here is the source code:</p><div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#include</span> <span class="cpf">&lt;stdlib.h&gt;</span><span class="cp">
+#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp">
+#include</span> <span class="cpf">&lt;fcntl.h&gt;</span><span class="cp">
+#include</span> <span class="cpf">&lt;signal.h&gt;</span><span class="cp">
+#include</span> <span class="cpf">&lt;string.h&gt;</span><span class="cp">
+#include</span> <span class="cpf">&lt;time.h&gt;</span><span class="cp">
+#include</span> <span class="cpf">&lt;unistd.h&gt;</span><span class="cp">
+#include</span> <span class="cpf">&lt;sys/types.h&gt;</span><span class="cp">
+#include</span> <span class="cpf">&lt;sys/stat.h&gt;</span><span class="cp">
+#include</span> <span class="cpf">&lt;sys/mman.h&gt;</span><span class="cp">
+#include</span> <span class="cpf">&lt;sys/ipc.h&gt;</span><span class="cp">
+#include</span> <span class="cpf">"semaphores.h"</span><span class="cp">
 </span>
 <span class="c1">// The Hare and the Tortoise</span>
 
@@ -133,11 +133,11 @@ Killed
 #define _POSIX_C_SOURCE 200809L
 #define _ATFILE_SOURCE
 </span>
-<span class="cp">#include &lt;fcntl.h&gt;
-#include &lt;stdio.h&gt;
-#include &lt;unistd.h&gt;
-#include &lt;linux/fs.h&gt;
-#include &lt;sys/syscall.h&gt;
+<span class="cp">#include</span> <span class="cpf">&lt;fcntl.h&gt;</span><span class="cp">
+#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp">
+#include</span> <span class="cpf">&lt;unistd.h&gt;</span><span class="cp">
+#include</span> <span class="cpf">&lt;linux/fs.h&gt;</span><span class="cp">
+#include</span> <span class="cpf">&lt;sys/syscall.h&gt;</span><span class="cp">
 </span>
 <span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
     <span class="k">while</span> <span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
@@ -247,4 +247,4 @@ The tortoise, progressing slowly... : "}"
 The tortoise, progressing slowly... : "}"
 Slow but steady wins the race!
 </code></pre></div></div><p>After multiple tries, the tortoise opened the symlink to <code class="language-plaintext highlighter-rouge">flag.txt</code> instead of the sparse file and I was able to transform the lines into a flag:</p><div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>shkCTF{r4c35_4r3_3asi3r_wh3n_y0u_4r3_al0ne_6a26a26c57f0012ed66ab8c20e538a04}
-</code></pre></div></div><p>Thank you to <a href="https://github.com/seanjpagano">seanjpagano</a>, for your <a href="https://github.com/LibWTF/ctf_writeups/blob/master/SharkyCTF-2020/The_hare_and_the_tortoise.md">writeup</a> which I used in order to get the files.</p><time datetime="2020-05-11">11 May 2020</time></main><footer> &copy; 2021 <a href="https://www.nilsand.re/">Nils André</a></footer></body></html>
+</code></pre></div></div><p>Thank you to <a href="https://github.com/seanjpagano">seanjpagano</a>, for your <a href="https://github.com/LibWTF/ctf_writeups/blob/master/SharkyCTF-2020/The_hare_and_the_tortoise.md">writeup</a> which I used in order to get the files.</p><time datetime="2020-05-11">11 May 2020</time></main><footer> &copy; 2021, 2024 <a href="https://www.nilsand.re/">Nils André</a></footer></body></html>
